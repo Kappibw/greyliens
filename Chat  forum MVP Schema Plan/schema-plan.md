@@ -34,7 +34,7 @@ This document defines the minimum database structure required for the Chat Forum
 | username    | VARCHAR(50)    | Required, Unique        | Username entered when posting |
 | created_at  | TIMESTAMP      | Required                | When the user was created |
 
----
+### Channels Table
 | Field        | Type          | Constraints                     | Description |
 |-------------|--------------|--------------------------------|-------------|
 | id          | UUID / Integer | Primary Key, Required         | Unique identifier for the channel |
@@ -67,7 +67,7 @@ This document defines the minimum database structure required for the Chat Forum
 - Each message belongs to exactly one channel  
 - One user can create many messages  
 - Each message belongs to exactly one user
-- - One message can have many replies  
+-  - One message can have many replies  
 - A reply belongs to one parent message
 
 ---
@@ -93,7 +93,7 @@ This document defines the minimum database structure required for the Chat Forum
 - `channel_id` is required for every message  
 - `edited` defaults to `false`  
 - `is_private` defaults to `false`
- - `author_id` is required for every message 
+- `author_id` is required for every message 
 - usernames must be unique
 
 ---
@@ -110,11 +110,12 @@ This document defines the minimum database structure required for the Chat Forum
 
 ### Example Message Rows
 
-| id | channel_id | author_id | parent_message_id | content | edited | created_at |
-|----|------------|----------|--------------------|--------|---------------------|
-| 1  | 1          | 1        | Hello everyone!      | false  | 2026-05-15 10:05    |
-| 2  | 1          | 2        | Welcome to the forum | true   | 2026-05-15 10:07    |
+### Example Message Rows
 
+| id | channel_id | author_id | parent_message_id | content            | edited | created_at          |
+|----|------------|----------|--------------------|--------------------|--------|---------------------|
+| 1  | 1          | 1        | NULL               | Hello everyone!    | false  | 2026-05-15 10:05    |
+| 2  | 1          | 2        | 1                  | I agree!           | false  | 2026-05-15 10:10    |
 ---
 
 ## Decision Log
@@ -126,7 +127,7 @@ This document defines the minimum database structure required for the Chat Forum
 | No reactions or threads yet | Outside MVP scope |
 | Unique channel names | Prevents duplicate/confusing channels |
 | Reply support planned | parent_message_id allows future threaded replies |
-| 3  | 1          | 2         | 1                 | I agree! | false | 2026-05-15 10:10 |
+
 
 ---
 

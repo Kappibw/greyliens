@@ -25,7 +25,7 @@ This document defines the minimum database structure required for the Chat Forum
 
 ---
 
-### Channels Table
+
 ### Users Table
 
 | Field       | Type           | Constraints             | Description |
@@ -52,7 +52,7 @@ This document defines the minimum database structure required for the Chat Forum
 |-------------|--------------|--------------------------------|-------------|
 | id          | UUID / Integer | Primary Key, Required         | Unique identifier for the message |
 | channel_id  | Foreign Key   | Required                      | References channels.id |
- | author_id   | Foreign Key   | Required                      | References users.id |                    
+ | author_id  | Foreign Key   | Required                      | References users.id |                    
 | content     | TEXT          | Required                      | Stores message text |
 | edited      | BOOLEAN       | Default = false               | Indicates whether the message was edited |
 | created_at  | TIMESTAMP     | Required                      | Time the message was sent |
@@ -89,7 +89,7 @@ This document defines the minimum database structure required for the Chat Forum
 - `channel_id` is required for every message  
 - `edited` defaults to `false`  
 - `is_private` defaults to `false`
--  - author_id is required for every message  
+ - `author_id` is required for every message 
 - usernames must be unique
 
 ---

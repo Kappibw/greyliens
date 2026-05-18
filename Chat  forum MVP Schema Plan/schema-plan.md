@@ -52,7 +52,8 @@ This document defines the minimum database structure required for the Chat Forum
 |-------------|--------------|--------------------------------|-------------|
 | id          | UUID / Integer | Primary Key, Required         | Unique identifier for the message |
 | channel_id  | Foreign Key   | Required                      | References channels.id |
- | author_id  | Foreign Key   | Required                      | References users.id |                    
+| author_id  | Foreign Key   | Required                      | References users.id |
+| parent_message_id | Foreign Key | Nullable | References messages.id for reply support |
 | content     | TEXT          | Required                      | Stores message text |
 | edited      | BOOLEAN       | Default = false               | Indicates whether the message was edited |
 | created_at  | TIMESTAMP     | Required                      | Time the message was sent |
@@ -65,7 +66,9 @@ This document defines the minimum database structure required for the Chat Forum
 - One channel can contain many messages  
 - Each message belongs to exactly one channel  
 - One user can create many messages  
-- Each message belongs to exactly one user 
+- Each message belongs to exactly one user
+- - One message can have many replies  
+- A reply belongs to one parent message
 
 ---
 
@@ -79,6 +82,7 @@ This document defines the minimum database structure required for the Chat Forum
 
 - Messages.channel_id → Channels.id  
 - Messages.author_id → Users.id
+- Messages.parent_message_id → Messages.id
 
 ---
 
@@ -106,7 +110,7 @@ This document defines the minimum database structure required for the Chat Forum
 
 ### Example Message Rows
 
-| id | channel_id | author_id | content            | edited | created_at          |
+| id | channel_id | author_id | parent_message_id | content | edited | created_at |
 |----|------------|----------|--------------------|--------|---------------------|
 | 1  | 1          | 1        | Hello everyone!      | false  | 2026-05-15 10:05    |
 | 2  | 1          | 2        | Welcome to the forum | true   | 2026-05-15 10:07    |
@@ -121,6 +125,8 @@ This document defines the minimum database structure required for the Chat Forum
 | Hand-made users for MVP | Keeps implementation simple without full authentication |
 | No reactions or threads yet | Outside MVP scope |
 | Unique channel names | Prevents duplicate/confusing channels |
+| Reply support planned | parent_message_id allows future threaded replies |
+| 3  | 1          | 2         | 1                 | I agree! | false | 2026-05-15 10:10 |
 
 ---
 

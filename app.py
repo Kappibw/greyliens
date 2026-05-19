@@ -16,7 +16,7 @@ def get_conn():
 # -------------------------
 @app.route("/")
 def home():
-    return "Hello, Flask!"
+    return jsonify({"message": "Flask is running 🚀"})
 
 
 # -------------------------
@@ -44,17 +44,25 @@ def messages():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT m.id, m.content, u.username, c.name
-        FROM messages m
-        JOIN users u ON m.author_id = u.id
-        JOIN channels c ON m.channel_id = c.id
-        ORDER BY m.id;
+        SELECT id, content, author_id, channel_id, created_at
+        FROM messages
+        ORDER BY id;
     """)
 
     rows = cur.fetchall()
     conn.close()
 
-    return jsonify(rows)
+    messages = []
+    for r in rows:
+        messages.append({
+            "id": r[0],
+            "content": r[1],
+            "author_id": r[2],
+            "channel_id": r[3],
+            "created_at": r[4].isoformat() if r[4] else None
+        })
+
+    return jsonify(messages)
 
 
 # -------------------------

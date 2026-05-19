@@ -1,12 +1,16 @@
 import os
 import psycopg2
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 
 app = Flask(__name__)
 
+# Load database URL from environment variables (Railway / .env)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 
+# -------------------------
+# DATABASE CONNECTION
+# -------------------------
 def get_conn():
     return psycopg2.connect(DATABASE_URL)
 
@@ -16,7 +20,7 @@ def get_conn():
 # -------------------------
 @app.route("/")
 def home():
-    return jsonify({"message": "Flask is running 🚀"})
+    return "Hello, Flask!"
 
 
 # -------------------------
@@ -36,7 +40,7 @@ def test_db():
 
 
 # -------------------------
-# GET ALL MESSAGES
+# GET ALL MESSAGES (JSON API)
 # -------------------------
 @app.route("/messages")
 def messages():
@@ -44,25 +48,36 @@ def messages():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, content, author_id, channel_id, created_at
-        FROM messages
-        ORDER BY id;
+        SELECT m.id, m.content, m.author_id, m.channel_id, c.name
+        FROM messages m
+        JOIN channels c ON m.channel_id = c.id
+        ORDER BY m.id;
     """)
 
     rows = cur.fetchall()
     conn.close()
 
-    messages = []
-    for r in rows:
-        messages.append({
-            "id": r[0],
-            "content": r[1],
-            "author_id": r[2],
-            "channel_id": r[3],
-            "created_at": r[4].isoformat() if r[4] else None
-        })
+    return jsonify(rows)
 
-    return jsonify(messages)
+
+# -------------------------
+# FORUM PAGE (HTML UI)
+# -------------------------
+@app.route("/forum")
+def forum():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, content, author_id, channel_id, created_at
+        FROM messages
+        ORDER BY created_at DESC;
+    """)
+
+    messages = cur.fetchall()
+    conn.close()
+
+    return render_template("forum.html", messages=messages)
 
 
 # -------------------------
@@ -90,5 +105,8 @@ def edit_sample_message():
     })
 
 
+# -------------------------
+# RUN APP
+# -------------------------
 if __name__ == "__main__":
     app.run(debug=True)

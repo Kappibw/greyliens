@@ -1,2 +1,2 @@
 
-animals = ["cow","horse","pig]
+animals = ["cow","horse","pig"]

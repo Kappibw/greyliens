@@ -1,3 +1,4 @@
-import animals
+import animals as my_animals
 
-farm = {"stable": creature for creature in animals.animals}
+animals = my_animals.animals
+farm = {"stable": creature for creature in animals}

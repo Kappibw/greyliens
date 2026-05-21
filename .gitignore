@@ -1,1 +1,6 @@
-Assignment screeenshots/__pycache__/*.pyc.envvenv/ 
+Assignment screeenshots/
+__pycache__/
+*.pyc
+.env
+venv/
+ 

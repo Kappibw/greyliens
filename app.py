@@ -1,3 +1,4 @@
+ HEAD
 import os
 import psycopg2
 from flask import Flask, jsonify, render_template
@@ -18,10 +19,16 @@ def get_conn():
 # -------------------------
 # HOME ROUTE
 # -------------------------
+from flask import Flask
+
+app = Flask(__name__)
+
+ origin/main
 @app.route("/")
 def home():
     return "Hello, Flask!"
 
+ HEAD
 
 # -------------------------
 # TEST DATABASE CONNECTION
@@ -108,5 +115,7 @@ def edit_sample_message():
 # -------------------------
 # RUN APP
 # -------------------------
+
+ origin/main
 if __name__ == "__main__":
     app.run(debug=True)

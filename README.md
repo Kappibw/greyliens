@@ -120,3 +120,8 @@ Run:
 ```bash
 flask run --port 5001
 ``
+## Final Submission Update
+
+- Flask connected to Railway PostgreSQL using psycopg2
+- DATABASE_URL handled via environment variables
+- Channels and Users data loaded via SQL queries

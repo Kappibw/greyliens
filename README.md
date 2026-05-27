@@ -1,126 +1,60 @@
-# Flask Hello World Application
+# 📘 Chat Forum MVP – Flask + PostgreSQL (Railway)
 
-## Overview
+## 📌 Overview
 
-This project demonstrates local Flask development setup.
+This project is a Chat Forum MVP backend built using Flask and PostgreSQL hosted on Railway.
 
-The goal is to allow developers to:
+It demonstrates a simple messaging system with:
+- Users
+- Channels
+- Messages
 
-1. Clone the repository
-2. Install dependencies
-3. Run the Flask app locally
-4. Verify localhost works
-
----
-
-
-## Clone Repository
-
-```bash
-git clone <REPOSITORY_URL>
-cd <PROJECT_FOLDER>
-```
-
-## Create Virtual Environment
-
-### Windows
-
-```bash
-python -m venv venv
-```
-
-
-## Activate Virtual Environment
-
-### Windows
-
-```bash
-venv\Scripts\activate
-```
-
-### macOS/Linux
-
-
-## Install Flask
-
-```bash
-pip install flask
-```
-
-## Save Dependencies
-
-```bash
-pip freeze > requirements.txt
-```
+The system connects Flask to a live PostgreSQL database using environment variables.
 
 ---
 
-# Running the Application
+## ⚙️ Tech Stack
 
-```bash
-python app.py
-```
-
----
-
-# Verification Step
-
-Open:
-
-http://127.0.0.1:5000
-
-Expected output:
-
-Hello, Flask!
+- Python 3
+- Flask
+- PostgreSQL (Railway)
+- psycopg2
 
 ---
 
-# Daily Development Workflow
+## 🗄️ Database Structure
 
-## Activate Environment
+### Users
+- id (Primary Key)
+- username
+- created_at
 
-### Windows
+### Channels
+- id (Primary Key)
+- name
+- description
+- is_private
+- created_at
+- updated_at
 
-```bash
-venv\Scripts\activate
-```
-
-## Run Flask
-
-```bash
-python app.py
-```
-
----
-
-# Common Setup Issues
-
-## python not found
-
-Try:
-
-```bash
-python3 --version
-```
-
-## flask not found
-# Flask Hello World Application
-
-## Overview
-
-This project demonstrates local Flask development setup.
-
-The goal is to allow developers to:
-
-1. Clone the repository
-2. Install dependencies
-3. Run the Flask app locally
-4. Verify localhost works
+### Messages
+- id (Primary Key)
+- channel_id (Foreign Key)
+- author_id (Foreign Key)
+- content
+- created_at
 
 ---
 
-## Clone Repository
+## 🔌 Database Connection (Railway)
 
-```bash
-git clone <REPOSITORY_URL>
-cd <PROJECT_FOLDER>
+The app connects to Railway PostgreSQL using environment variables:
+
+```python
+import os
+import psycopg2
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+def get_conn():
+    return psycopg2.connect(DATABASE_URL)

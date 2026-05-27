@@ -104,24 +104,23 @@ python3 --version
 ```
 
 ## flask not found
+# Flask Hello World Application
 
-Activate virtual environment first.
+## Overview
 
-Then run:
+This project demonstrates local Flask development setup.
+
+The goal is to allow developers to:
+
+1. Clone the repository
+2. Install dependencies
+3. Run the Flask app locally
+4. Verify localhost works
+
+---
+
+## Clone Repository
 
 ```bash
-pip install -r requirements.txt
-```
-
-## Port already in use
-
-Run:
-
-```bash
-flask run --port 5001
-``
-## Final Submission Update
-
-- Flask connected to Railway PostgreSQL using psycopg2
-- DATABASE_URL handled via environment variables
-- Channels and Users data loaded via SQL queries
+git clone <REPOSITORY_URL>
+cd <PROJECT_FOLDER>

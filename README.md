@@ -1,6 +1,6 @@
-# 📘 Chat Forum MVP – Flask + PostgreSQL (Railway)
+# Chat Forum MVP – Flask + PostgreSQL (Railway)
 
-## 📌 Overview
+##  Overview
 
 This project is a Chat Forum MVP backend built using Flask and PostgreSQL hosted on Railway.
 
@@ -13,7 +13,7 @@ The system connects Flask to a live PostgreSQL database using environment variab
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 - Python 3
 - Flask
@@ -22,7 +22,7 @@ The system connects Flask to a live PostgreSQL database using environment variab
 
 ---
 
-## 🗄️ Database Structure
+## Database Structure
 
 ### Users
 - id (Primary Key)
@@ -46,7 +46,7 @@ The system connects Flask to a live PostgreSQL database using environment variab
 
 ---
 
-## 🔌 Database Connection (Railway)
+## Database Connection (Railway)
 
 The app connects to Railway PostgreSQL using environment variables:
 

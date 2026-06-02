@@ -5,14 +5,22 @@
 </head>
 <body>
 
-<h1>Chat Forum</h1>
+<h1>Chat Forum - General</h1>
+
+<form method="POST" action="/send">
+    <input type="text" name="content" placeholder="Type message" required>
+    <button type="submit">Send</button>
+</form>
+
+<hr>
 
 {% if messages %}
     <ul>
         {% for msg in messages %}
             <li>
-                <b>{{ msg[1] }}</b><br>
-                <small>User ID: {{ msg[2] }} | Channel ID: {{ msg[3] }}</small>
+                <b>{{ msg[2] }}</b> ({{ msg[3] }})<br>
+                {{ msg[1] }}<br>
+                <small>{{ msg[4] }}</small>
             </li>
         {% endfor %}
     </ul>

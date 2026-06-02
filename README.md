@@ -1,24 +1,26 @@
+
 # Chat Forum MVP – Flask + PostgreSQL (Railway)
 
 ## Overview
 
-This project is a Flask-based chat forum application connected to a Railway-hosted PostgreSQL database.
+This project is a Flask-based chat forum application connected to a PostgreSQL database hosted on Railway.
 
 It demonstrates:
 
 * Secure database connection using environment variables
-* Retrieval of messages from PostgreSQL
-* Display of database-driven data in a Flask web interface
+* Retrieval of messages using SQL JOIN queries
+* Display of database-driven content in a Flask web interface
+* Basic relational database structure (users, channels, messages)
 
 ---
 
 ## Features
 
 * Flask web application
-* PostgreSQL database hosted on Railway
-* Environment variable configuration (`DATABASE_URL`)
-* SQL JOIN queries to combine users, channels, and messages
-* Dynamic rendering of database content in the UI
+* Railway-hosted PostgreSQL database
+* Environment variable configuration using `DATABASE_URL`
+* Relational SQL queries using JOINs
+* Dynamic rendering of messages from the database
 
 ---
 
@@ -30,35 +32,50 @@ templates/
     forum.html
 schema.md
 README.md
+screenshots/
 ```
 
 ---
 
-## Installation
+## Database Schema
 
-Install required dependencies:
+The database contains three main tables:
 
-```bash
-pip install flask psycopg2-binary
-```
+* users
+* channels
+* messages
+
+### Relationships
+
+* A user can create many messages
+* A channel can contain many messages
+* Each message belongs to one user and one channel
 
 ---
 
 ## Environment Variables
 
-Set your database connection string:
+This project requires a PostgreSQL connection string from Railway.
 
-```bash
-DATABASE_URL=your_railway_postgres_connection_string
+Set the environment variable:
+
+### Windows (PowerShell)
+
 ```
-
-Windows PowerShell:
-
-```bash
 setx DATABASE_URL "your_railway_postgres_connection_string"
 ```
 
-Restart your terminal after setting the variable.
+Then restart your terminal.
+
+---
+
+## Installation
+
+Install dependencies:
+
+```
+pip install flask psycopg2-binary
+```
 
 ---
 
@@ -66,11 +83,11 @@ Restart your terminal after setting the variable.
 
 Start the Flask server:
 
-```bash
+```
 python app.py
 ```
 
-Then open:
+Open in browser:
 
 ```
 http://127.0.0.1:5000/
@@ -78,25 +95,15 @@ http://127.0.0.1:5000/
 
 ---
 
-## Database Schema
-
-The application uses three tables:
-
-* users
-* channels
-* messages
-
-These tables are related using foreign keys to support relational queries.
-
----
-
 ## Database Query Logic
 
-Messages are retrieved using SQL JOIN queries that combine:
+The application retrieves messages using SQL JOIN queries:
 
-* messages (content + timestamps)
-* users (username)
-* channels (channel name)
+* messages table (content, timestamps)
+* users table (username)
+* channels table (channel name)
+
+This ensures normalized relational data is displayed correctly.
 
 ---
 
@@ -104,10 +111,20 @@ Messages are retrieved using SQL JOIN queries that combine:
 
 DBGate was used to:
 
-* Inspect PostgreSQL tables
-* Verify relationships
-* Confirm inserted data
-* Validate query results
+* Inspect database tables
+* Verify relationships between entities
+* Confirm inserted records
+* Validate query output
+
+---
+
+## Screenshots
+
+
+* DBGate: users table
+* DBGate: channels table
+* DBGate: messages table
+* Flask UI showing messages loaded from database
 
 ---
 
@@ -115,30 +132,37 @@ DBGate was used to:
 
 ### Database not connecting
 
-Ensure `DATABASE_URL` is correctly set.
+Ensure `DATABASE_URL` is correctly set in environment variables.
 
-### No messages appearing
+### No messages displayed
 
-Check that messages exist in the `messages` table.
+Check that the `messages` table contains data.
 
-### Schema errors
+### SQL errors
 
-Ensure database tables exist in Railway PostgreSQL.
+Ensure tables exist and relationships match schema.
 
 ---
 
 ## Notes
 
-* No credentials are hardcoded in this project
-* All database access uses environment variables
-* The `/` route is the main interface for displaying messages
+* No credentials are hardcoded in the application
+* Database access is handled using environment variables
+* The root route `/` displays all messages from the database
+* The application assumes a preconfigured Railway PostgreSQL database
 
 ---
 
 ## Status
 
-This project is fully connected to a Railway PostgreSQL database and successfully displays dynamic data from the database in a Flask web application.
+The application is fully connected to a Railway PostgreSQL database and successfully renders dynamic data from the database in a Flask web interface.
 
 ---
 
+If you want next, I can help you:
 
+* fix final Git push (so you don’t break again)
+* or verify your PR before submission
+* or check your screenshots match grading requirements
+
+Just tell me 👍

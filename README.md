@@ -159,7 +159,7 @@ The application is fully connected to a Railway PostgreSQL database and successf
 
 ---
 
-If you want next, I can help you:
+
 
 * fix final Git push (so you don’t break again)
 * or verify your PR before submission

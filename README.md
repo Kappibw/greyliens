@@ -1,122 +1,168 @@
-# Flask Hello World Application
+
+# Chat Forum MVP – Flask + PostgreSQL (Railway)
 
 ## Overview
 
-This project demonstrates local Flask development setup.
+This project is a Flask-based chat forum application connected to a PostgreSQL database hosted on Railway.
 
-The goal is to allow developers to:
+It demonstrates:
 
-1. Clone the repository
-2. Install dependencies
-3. Run the Flask app locally
-4. Verify localhost works
+* Secure database connection using environment variables
+* Retrieval of messages using SQL JOIN queries
+* Display of database-driven content in a Flask web interface
+* Basic relational database structure (users, channels, messages)
 
 ---
 
+## Features
 
-## Clone Repository
+* Flask web application
+* Railway-hosted PostgreSQL database
+* Environment variable configuration using `DATABASE_URL`
+* Relational SQL queries using JOINs
+* Dynamic rendering of messages from the database
 
-```bash
-git clone <REPOSITORY_URL>
-cd <PROJECT_FOLDER>
+---
+
+## Project Structure
+
 ```
-
-## Create Virtual Environment
-
-### Windows
-
-```bash
-python -m venv venv
-```
-
-
-## Activate Virtual Environment
-
-### Windows
-
-```bash
-venv\Scripts\activate
-```
-
-### macOS/Linux
-
-
-## Install Flask
-
-```bash
-pip install flask
-```
-
-## Save Dependencies
-
-```bash
-pip freeze > requirements.txt
+app.py
+templates/
+    forum.html
+schema.md
+README.md
+screenshots/
 ```
 
 ---
 
-# Running the Application
+## Database Schema
 
-```bash
+The database contains three main tables:
+
+* users
+* channels
+* messages
+
+### Relationships
+
+* A user can create many messages
+* A channel can contain many messages
+* Each message belongs to one user and one channel
+
+---
+
+## Environment Variables
+
+This project requires a PostgreSQL connection string from Railway.
+
+Set the environment variable:
+
+### Windows (PowerShell)
+
+```
+setx DATABASE_URL "your_railway_postgres_connection_string"
+```
+
+Then restart your terminal.
+
+---
+
+## Installation
+
+Install dependencies:
+
+```
+pip install flask psycopg2-binary
+```
+
+---
+
+## Running the Application
+
+Start the Flask server:
+
+```
 python app.py
 ```
 
----
+Open in browser:
 
-# Verification Step
-
-Open:
-
-http://127.0.0.1:5000
-
-Expected output:
-
-Hello, Flask!
-
----
-
-# Daily Development Workflow
-
-## Activate Environment
-
-### Windows
-
-```bash
-venv\Scripts\activate
 ```
-
-## Run Flask
-
-```bash
-python app.py
+http://127.0.0.1:5000/
 ```
 
 ---
 
-# Common Setup Issues
+## Database Query Logic
 
-## python not found
+The application retrieves messages using SQL JOIN queries:
 
-Try:
+* messages table (content, timestamps)
+* users table (username)
+* channels table (channel name)
 
-```bash
-python3 --version
-```
+This ensures normalized relational data is displayed correctly.
 
-## flask not found
+---
 
-Activate virtual environment first.
+## Database Inspection
 
-Then run:
+DBGate was used to:
 
-```bash
-pip install -r requirements.txt
-```
+* Inspect database tables
+* Verify relationships between entities
+* Confirm inserted records
+* Validate query output
 
-## Port already in use
+---
 
-Run:
+## Screenshots
 
-```bash
-flask run --port 5001
-``
+
+* DBGate: users table
+* DBGate: channels table
+* DBGate: messages table
+* Flask UI showing messages loaded from database
+
+---
+
+## Troubleshooting
+
+### Database not connecting
+
+Ensure `DATABASE_URL` is correctly set in environment variables.
+
+### No messages displayed
+
+Check that the `messages` table contains data.
+
+### SQL errors
+
+Ensure tables exist and relationships match schema.
+
+---
+
+## Notes
+
+* No credentials are hardcoded in the application
+* Database access is handled using environment variables
+* The root route `/` displays all messages from the database
+* The application assumes a preconfigured Railway PostgreSQL database
+
+---
+
+## Status
+
+The application is fully connected to a Railway PostgreSQL database and successfully renders dynamic data from the database in a Flask web interface.
+
+---
+
+
+
+* fix final Git push (so you don’t break again)
+* or verify your PR before submission
+* or check your screenshots match grading requirements
+
+Just tell me 👍

@@ -1,19 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Forum</title>
+    <title>THIS IS THE NEW TEMPLATE</title>
 </head>
 <body>
 
-<h1>Chat Forum - General</h1>
+<h1>TEST TEMPLATE LOADED</h1>
+
+<!-- Identity Display -->
+<p>
+    Current User:
+    {% if user %}
+        <b>{{ user }}</b>
+    {% else %}
+        <b>Not logged in</b>
+    {% endif %}
+</p>
+
+<p>Identity State: <b>{{ identity }}</b></p>
+
+<!-- Login / Logout Controls -->
+{% if identity == "logged_out" %}
+
+    <h3>Login</h3>
+
+    <form method="POST" action="/login">
+        <input type="text" name="username" placeholder="Username" required>
+        <button type="submit">Login</button>
+    </form>
+
+    <br>
+
+    <a href="/guest-login">
+        <button>Continue as Guest</button>
+    </a>
+
+{% else %}
+
+    <a href="/logout">
+        <button>Logout</button>
+    </a>
+
+{% endif %}
+
+<hr>
+
+<!-- Message Form -->
+{% if identity != "logged_out" %}
 
 <form method="POST" action="/send">
     <input type="text" name="content" placeholder="Type message" required>
     <button type="submit">Send</button>
 </form>
 
+{% else %}
+
+<p>You must log in before posting messages.</p>
+
+{% endif %}
+
 <hr>
 
+<!-- Messages -->
 {% if messages %}
     <ul>
         {% for msg in messages %}

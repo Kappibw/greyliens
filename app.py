@@ -6,10 +6,9 @@ from auth import get_identity
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.getenv(
-    "SECRET_KEY",
-    "dev-secret-key-change-this"
-)
+# Used by Flask to securely sign session cookies.
+# The value should be provided through environment variables.
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 print("APP FILE:", os.path.abspath(__file__))
 print("TEMPLATE FOLDER:", app.template_folder)
@@ -20,6 +19,12 @@ print("TEMPLATE FOLDER:", app.template_folder)
 # -----------------------
 @app.route("/")
 def index():
+    """
+    Displays the forum homepage.
+
+    Retrieves all messages from the database along with
+    their authors and channels, then renders the forum page.
+    """
     print("SESSION:", dict(session))
     print("IDENTITY:", get_identity())
 
@@ -52,6 +57,12 @@ def index():
 # -----------------------
 @app.route("/send", methods=["POST"])
 def send():
+    """
+    Creates a new message in the general channel.
+
+    Only authenticated users are allowed
+    to submit messages.
+    """
     if "user_id" not in session:
         return "Not allowed (logged out)", 403
 
@@ -66,7 +77,7 @@ def send():
     user_id = session["user_id"]
 
     cur.execute(
-        "SELECT id FROM channels WHERE name='general' LIMIT 1;"
+        "SELECT id FROM channels WHERE name = 'general' LIMIT 1;"
     )
 
     channel = cur.fetchone()
@@ -96,11 +107,15 @@ def send():
 # -----------------------
 @app.route("/guest-login")
 def guest_login():
+    """
+    Logs a user into the application
+    using the guest account.
+    """
     conn = get_conn()
     cur = conn.cursor()
 
     cur.execute(
-        "SELECT id FROM users WHERE username='guest' LIMIT 1;"
+        "SELECT id FROM users WHERE username = 'guest' LIMIT 1;"
     )
 
     user = cur.fetchone()
@@ -122,6 +137,12 @@ def guest_login():
 # -----------------------
 @app.route("/login", methods=["POST"])
 def login():
+    """
+    Authenticates a user by username.
+
+    If the username exists, the user's
+    information is stored in the session.
+    """
     username = request.form.get("username")
 
     if not username:
@@ -131,7 +152,7 @@ def login():
     cur = conn.cursor()
 
     cur.execute(
-        "SELECT id, username FROM users WHERE username=%s",
+        "SELECT id, username FROM users WHERE username = %s;",
         (username,)
     )
 
@@ -154,12 +175,18 @@ def login():
 # -----------------------
 @app.route("/logout")
 def logout():
+    """
+    Logs out the current user.
+
+    Clears all session data and
+    redirects to the homepage.
+    """
     session.clear()
     return redirect("/")
 
 
 # -----------------------
-# RUN APP
+# RUN APPLICATION
 # -----------------------
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-
 <html>
 <head>
-    <title>Greyliens </title>
+    <title>Greyliens Forum</title>
 </head>
 <body>
 
-```
-<h1>Greyliens </h1>
+<h1>Greyliens Forum</h1>
 
 <!-- User Information -->
 <p>
@@ -89,20 +87,27 @@
 
     <ul>
         {% for msg in messages %}
-            <li>
+            <li style="margin-bottom: 12px;">
+
                 <strong>{{ msg[2] }}</strong>
                 in
                 <strong>#{{ msg[3] }}</strong>
+
                 <br>
 
                 {{ msg[1] }}
 
                 <br>
 
-                <small>{{ msg[4] }}</small>
-            </li>
+                <small>
+                    {% if msg[4] %}
+                        {{ msg[4].strftime('%Y-%m-%d %H:%M') }}
+                    {% else %}
+                        No timestamp
+                    {% endif %}
+                </small>
 
-            <br>
+            </li>
         {% endfor %}
     </ul>
 
@@ -111,7 +116,6 @@
     <p>No messages yet.</p>
 
 {% endif %}
-```
 
 </body>
 </html>

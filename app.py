@@ -6,9 +6,15 @@ from auth import get_identity
 
 app = Flask(__name__)
 
+# -----------------------
+# SECURITY CONFIG
+# -----------------------
 # Used by Flask to securely sign session cookies.
-# The value should be provided through environment variables.
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+# IMPORTANT: must never be None or sessions will break.
+app.config["SECRET_KEY"] = os.getenv(
+    "SECRET_KEY",
+    "dev-secret-key-change-this"
+)
 
 print("APP FILE:", os.path.abspath(__file__))
 print("TEMPLATE FOLDER:", app.template_folder)
@@ -60,8 +66,7 @@ def send():
     """
     Creates a new message in the general channel.
 
-    Only authenticated users are allowed
-    to submit messages.
+    Only authenticated users are allowed to submit messages.
     """
     if "user_id" not in session:
         return "Not allowed (logged out)", 403
@@ -108,8 +113,7 @@ def send():
 @app.route("/guest-login")
 def guest_login():
     """
-    Logs a user into the application
-    using the guest account.
+    Logs a user into the application using the guest account.
     """
     conn = get_conn()
     cur = conn.cursor()
@@ -140,8 +144,7 @@ def login():
     """
     Authenticates a user by username.
 
-    If the username exists, the user's
-    information is stored in the session.
+    If the username exists, the user's information is stored in session.
     """
     username = request.form.get("username")
 
@@ -176,17 +179,14 @@ def login():
 @app.route("/logout")
 def logout():
     """
-    Logs out the current user.
-
-    Clears all session data and
-    redirects to the homepage.
+    Logs out the current user and clears session data.
     """
     session.clear()
     return redirect("/")
 
 
 # -----------------------
-# RUN APPLICATION
+# RUN APP
 # -----------------------
 if __name__ == "__main__":
     app.run(debug=True)

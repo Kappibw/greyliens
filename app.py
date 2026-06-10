@@ -9,8 +9,6 @@ app = Flask(__name__)
 # -----------------------
 # SECURITY CONFIG
 # -----------------------
-# Used by Flask to securely sign session cookies.
-# IMPORTANT: must never be None or sessions will break.
 app.config["SECRET_KEY"] = os.getenv(
     "SECRET_KEY",
     "dev-secret-key-change-this"
@@ -21,15 +19,12 @@ print("TEMPLATE FOLDER:", app.template_folder)
 
 
 # -----------------------
-# HOME / MESSAGES
+# HOME / MESSAGES (READ-ONLY UI)
 # -----------------------
 @app.route("/")
 def index():
     """
-    Displays the forum homepage.
-
-    Retrieves all messages from the database along with
-    their authors and channels, then renders the forum page.
+    Displays the forum homepage with database content.
     """
     print("SESSION:", dict(session))
     print("IDENTITY:", get_identity())
@@ -37,12 +32,17 @@ def index():
     conn = get_conn()
     cur = conn.cursor()
 
+    # Load channels
+    cur.execute("SELECT id, name FROM channels")
+    channels = cur.fetchall()
+
+    # Load messages (threads)
     cur.execute("""
         SELECT m.id, m.content, u.username, c.name, m.created_at
         FROM messages m
         JOIN users u ON m.author_id = u.id
         JOIN channels c ON m.channel_id = c.id
-        ORDER BY m.id DESC;
+        ORDER BY m.id DESC
     """)
 
     messages = cur.fetchall()
@@ -52,6 +52,7 @@ def index():
 
     return render_template(
         "forum.html",
+        channels=channels,
         messages=messages,
         user=session.get("username"),
         identity=get_identity()
@@ -63,11 +64,6 @@ def index():
 # -----------------------
 @app.route("/send", methods=["POST"])
 def send():
-    """
-    Creates a new message in the general channel.
-
-    Only authenticated users are allowed to submit messages.
-    """
     if "user_id" not in session:
         return "Not allowed (logged out)", 403
 
@@ -112,9 +108,6 @@ def send():
 # -----------------------
 @app.route("/guest-login")
 def guest_login():
-    """
-    Logs a user into the application using the guest account.
-    """
     conn = get_conn()
     cur = conn.cursor()
 
@@ -141,11 +134,6 @@ def guest_login():
 # -----------------------
 @app.route("/login", methods=["POST"])
 def login():
-    """
-    Authenticates a user by username.
-
-    If the username exists, the user's information is stored in session.
-    """
     username = request.form.get("username")
 
     if not username:
@@ -178,9 +166,6 @@ def login():
 # -----------------------
 @app.route("/logout")
 def logout():
-    """
-    Logs out the current user and clears session data.
-    """
     session.clear()
     return redirect("/")
 

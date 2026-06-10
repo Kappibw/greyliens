@@ -4,6 +4,10 @@
     <title>Greyliens Forum</title>
 
     <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -20,15 +24,33 @@
             width: 60%;
             margin: auto;
         }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .channel {
+            color: #666;
+        }
+
+        small {
+            color: #888;
+        }
     </style>
 </head>
 
 <body>
 
+<!-- TOP BAR -->
 <div class="top-bar">
     <h2>Greyliens Forum</h2>
 
-    <!-- Top-right identity display -->
     <div class="identity">
         {% if identity == "logged_out" %}
             Not logged in
@@ -42,7 +64,7 @@
 
 <div class="container">
 
-<!-- LOGIN / LOGOUT SECTION -->
+<!-- LOGIN / LOGOUT -->
 {% if identity == "logged_out" %}
 
     <h3>Login</h3>
@@ -62,13 +84,7 @@
 
     <p>
         Logged in as:
-        <b>
-            {% if user %}
-                {{ user }}
-            {% else %}
-                Guest
-            {% endif %}
-        </b>
+        <b>{{ user }}</b>
     </p>
 
     <a href="/logout">
@@ -104,13 +120,17 @@
 
     <ul>
         {% for msg in messages %}
-            <li style="margin-bottom: 10px;">
+            <li>
                 <strong>{{ msg[2] }}</strong>
-                in <strong>#{{ msg[3] }}</strong>
-                <br>
+                in <strong class="channel">#{{ msg[3] }}</strong>
+                <br><br>
+
                 {{ msg[1] }}
-                <br>
-                <small>{{ msg[4].strftime('%Y-%m-%d %H:%M') }}</small>
+
+                <br><br>
+
+                <!-- SAFE timestamp (no crash) -->
+                <small>{{ msg[4] }}</small>
             </li>
         {% endfor %}
     </ul>

@@ -6,37 +6,34 @@ from auth import get_identity
 
 app = Flask(__name__)
 
-# -----------------------
-# SECURITY CONFIG
-# -----------------------
 app.config["SECRET_KEY"] = os.getenv(
     "SECRET_KEY",
     "dev-secret-key-change-this"
 )
 
-print("APP FILE:", os.path.abspath(__file__))
-print("TEMPLATE FOLDER:", app.template_folder)
-
 
 # -----------------------
-# HOME / MESSAGES (READ-ONLY UI)
+# HOME PAGE
 # -----------------------
 @app.route("/")
 def index():
-    """
-    Displays the forum homepage with database content.
-    """
-    print("SESSION:", dict(session))
-    print("IDENTITY:", get_identity())
-
     conn = get_conn()
     cur = conn.cursor()
 
-    # Load channels
+    # Channels
     cur.execute("SELECT id, name FROM channels")
     channels = cur.fetchall()
 
-    # Load messages (threads)
+    # Threads
+    cur.execute("""
+        SELECT t.id, t.title, t.content, u.username, t.created_at
+        FROM threads t
+        JOIN users u ON t.user_id = u.id
+        ORDER BY t.id DESC
+    """)
+    threads = cur.fetchall()
+
+    # Messages
     cur.execute("""
         SELECT m.id, m.content, u.username, c.name, m.created_at
         FROM messages m
@@ -44,7 +41,6 @@ def index():
         JOIN channels c ON m.channel_id = c.id
         ORDER BY m.id DESC
     """)
-
     messages = cur.fetchall()
 
     cur.close()
@@ -53,10 +49,41 @@ def index():
     return render_template(
         "forum.html",
         channels=channels,
+        threads=threads,
         messages=messages,
         user=session.get("username"),
         identity=get_identity()
     )
+
+
+# -----------------------
+# CREATE THREAD
+# -----------------------
+@app.route("/threads", methods=["POST"])
+def create_thread():
+    if "user_id" not in session:
+        return "Not allowed (logged out)", 403
+
+    title = request.form.get("title")
+    content = request.form.get("content")
+
+    if not title or not content:
+        return "Title and content required", 400
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO threads (title, content, user_id)
+        VALUES (%s, %s, %s)
+    """, (title, content, session["user_id"]))
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return redirect("/")
 
 
 # -----------------------
@@ -75,25 +102,16 @@ def send():
     conn = get_conn()
     cur = conn.cursor()
 
-    user_id = session["user_id"]
-
-    cur.execute(
-        "SELECT id FROM channels WHERE name = 'general' LIMIT 1;"
-    )
-
+    cur.execute("SELECT id FROM channels WHERE name = 'general' LIMIT 1;")
     channel = cur.fetchone()
 
     if not channel:
-        cur.close()
-        conn.close()
         return "Channel not found", 500
-
-    channel_id = channel[0]
 
     cur.execute("""
         INSERT INTO messages (channel_id, author_id, content)
         VALUES (%s, %s, %s)
-    """, (channel_id, user_id, content))
+    """, (channel[0], session["user_id"], content))
 
     conn.commit()
 
@@ -111,14 +129,8 @@ def guest_login():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute(
-        "SELECT id FROM users WHERE username = 'guest' LIMIT 1;"
-    )
-
+    cur.execute("SELECT id FROM users WHERE username = 'guest' LIMIT 1;")
     user = cur.fetchone()
-
-    cur.close()
-    conn.close()
 
     if not user:
         return "Guest user not found", 500
@@ -142,15 +154,8 @@ def login():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute(
-        "SELECT id, username FROM users WHERE username = %s;",
-        (username,)
-    )
-
+    cur.execute("SELECT id, username FROM users WHERE username = %s;", (username,))
     user = cur.fetchone()
-
-    cur.close()
-    conn.close()
 
     if not user:
         return "User not found", 404
@@ -171,7 +176,7 @@ def logout():
 
 
 # -----------------------
-# RUN APP
+# RUN
 # -----------------------
 if __name__ == "__main__":
     app.run(debug=True)

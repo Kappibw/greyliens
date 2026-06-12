@@ -5,19 +5,7 @@
 
     <style>
         body {
-            font-family: Arial, sans-serif;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .identity {
-            font-weight: bold;
+            font-family: Arial;
         }
 
         .container {
@@ -25,18 +13,22 @@
             margin: auto;
         }
 
-        ul {
-            list-style: none;
-            padding: 0;
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
         }
 
-        li {
+        .thread-box {
+            border: 1px solid #ddd;
             padding: 10px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+            border-radius: 6px;
         }
 
         .channel {
-            color: #666;
+            color: gray;
         }
 
         small {
@@ -47,98 +39,96 @@
 
 <body>
 
-<!-- TOP BAR -->
 <div class="top-bar">
     <h2>Greyliens Forum</h2>
 
-    <div class="identity">
+    <div>
         {% if identity == "logged_out" %}
             Not logged in
-        {% elif user %}
-            {{ user }}
         {% else %}
-            Guest
+            {{ user }}
         {% endif %}
     </div>
 </div>
 
 <div class="container">
 
-<!-- LOGIN / LOGOUT -->
+<!-- LOGIN -->
 {% if identity == "logged_out" %}
 
-    <h3>Login</h3>
+<form method="POST" action="/login">
+    <input name="username" placeholder="Username">
+    <button>Login</button>
+</form>
 
-    <form method="POST" action="/login">
-        <input type="text" name="username" placeholder="Username" required>
-        <button type="submit">Login</button>
-    </form>
-
-    <br>
-
-    <a href="/guest-login">
-        <button type="button">Continue as Guest</button>
-    </a>
+<a href="/guest-login">
+    <button>Guest</button>
+</a>
 
 {% else %}
 
-    <p>
-        Logged in as:
-        <b>{{ user }}</b>
-    </p>
+<p>Logged in as {{ user }}</p>
+<a href="/logout">Logout</a>
 
-    <a href="/logout">
-        <button type="button">Logout</button>
-    </a>
+{% endif %}
 
+<hr>
+
+<!-- THREAD FORM -->
+{% if identity != "logged_out" %}
+<h3>Create Thread</h3>
+
+<form method="POST" action="/threads">
+    <input name="title" placeholder="Title" required>
+    <br><br>
+    <textarea name="content" placeholder="Content" required></textarea>
+    <br><br>
+    <button>Create</button>
+</form>
+
+<hr>
+{% endif %}
+
+<!-- THREADS -->
+<h2>Threads</h2>
+
+{% if threads %}
+    {% for t in threads %}
+        <div class="thread-box">
+            <h3>{{ t[1] }}</h3>
+            <p>{{ t[2] }}</p>
+            <small>By {{ t[3] }} • {{ t[4] }}</small>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No threads yet.</p>
 {% endif %}
 
 <hr>
 
 <!-- MESSAGE FORM -->
 {% if identity != "logged_out" %}
-
-    <h3>Post a Message</h3>
-
-    <form method="POST" action="/send">
-        <input type="text" name="content" placeholder="Type message" required>
-        <button type="submit">Send</button>
-    </form>
-
-{% else %}
-
-    <p>You must log in before posting messages.</p>
-
+<form method="POST" action="/send">
+    <input name="content" placeholder="Message">
+    <button>Send</button>
+</form>
 {% endif %}
-
-<hr>
 
 <!-- MESSAGES -->
 <h2>Messages</h2>
 
 {% if messages %}
-
     <ul>
-        {% for msg in messages %}
+        {% for m in messages %}
             <li>
-                <strong>{{ msg[2] }}</strong>
-                in <strong class="channel">#{{ msg[3] }}</strong>
-                <br><br>
-
-                {{ msg[1] }}
-
-                <br><br>
-
-                <!-- SAFE timestamp (no crash) -->
-                <small>{{ msg[4] }}</small>
+                <b>{{ m[2] }}</b> in #{{ m[3] }}<br>
+                {{ m[1] }}<br>
+                <small>{{ m[4] }}</small>
             </li>
         {% endfor %}
     </ul>
-
 {% else %}
-
     <p>No messages yet.</p>
-
 {% endif %}
 
 </div>

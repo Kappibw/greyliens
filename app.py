@@ -16,10 +16,14 @@ app.config["SECRET_KEY"] = os.getenv(
 
 
 # =====================================================
-# AUTH HELPER (CENTRALIZED PERMISSION CHECK)
+# AUTH HELPER
 # =====================================================
 def require_login():
     return session.get("user_id") is not None
+
+
+def current_user():
+    return session.get("user_id")
 
 
 # =====================================================
@@ -69,24 +73,24 @@ def index():
         threads=threads,
         messages=messages,
         user=session.get("username"),
-        user_id=session.get("user_id"),
+        user_id=current_user(),
         identity=get_identity()
     )
 
 
 # =====================================================
-# CREATE THREAD (PROTECTED)
+# CREATE THREAD
 # =====================================================
 @app.route("/threads", methods=["POST"])
 def create_thread():
     if not require_login():
-        return "Unauthorized", 403
+        return jsonify({"error": "Unauthorized"}), 403
 
     title = request.form.get("title")
     content = request.form.get("content")
 
     if not title or not content:
-        return "Title and content required", 400
+        return jsonify({"error": "Title and content required"}), 400
 
     conn = get_conn()
     cur = conn.cursor()
@@ -94,7 +98,7 @@ def create_thread():
     cur.execute("""
         INSERT INTO threads (title, content, user_id)
         VALUES (%s, %s, %s)
-    """, (title, content, session["user_id"]))
+    """, (title, content, current_user()))
 
     conn.commit()
     cur.close()
@@ -135,13 +139,13 @@ def view_thread(thread_id):
         "thread.html",
         thread=thread,
         user=session.get("username"),
-        user_id=session.get("user_id"),
+        user_id=current_user(),
         identity=get_identity()
     )
 
 
 # =====================================================
-# CREATE REPLY (PROTECTED)
+# CREATE REPLY
 # =====================================================
 @app.route("/replies", methods=["POST"])
 def create_reply():
@@ -160,7 +164,7 @@ def create_reply():
     cur.execute("""
         INSERT INTO replies (thread_id, user_id, content)
         VALUES (%s, %s, %s)
-    """, (thread_id, session["user_id"], content))
+    """, (thread_id, current_user(), content))
 
     conn.commit()
     cur.close()
@@ -207,7 +211,7 @@ def get_replies(thread_id):
 
 
 # =====================================================
-# SEND MESSAGE (PROTECTED)
+# SEND MESSAGE
 # =====================================================
 @app.route("/send", methods=["POST"])
 def send():
@@ -235,7 +239,7 @@ def send():
     cur.execute("""
         INSERT INTO messages (channel_id, author_id, content)
         VALUES (%s, %s, %s)
-    """, (channel[0], session["user_id"], content))
+    """, (channel[0], current_user(), content))
 
     conn.commit()
     cur.close()
@@ -245,7 +249,7 @@ def send():
 
 
 # =====================================================
-# GUEST LOGIN
+# GUEST LOGIN (SAFER)
 # =====================================================
 @app.route("/guest-login")
 def guest_login():
@@ -260,16 +264,14 @@ def guest_login():
     """)
     user = cur.fetchone()
 
+    cur.close()
+    conn.close()
+
     if not user:
-        cur.close()
-        conn.close()
-        return "Guest not found", 500
+        return "Guest account not found", 500
 
     session["user_id"] = user[0]
     session["username"] = user[1]
-
-    cur.close()
-    conn.close()
 
     return redirect("/")
 
@@ -295,16 +297,14 @@ def login():
 
     user = cur.fetchone()
 
+    cur.close()
+    conn.close()
+
     if not user:
-        cur.close()
-        conn.close()
         return "User not found", 404
 
     session["user_id"] = user[0]
     session["username"] = user[1]
-
-    cur.close()
-    conn.close()
 
     return redirect("/")
 

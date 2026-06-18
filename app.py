@@ -16,7 +16,7 @@ app.config["SECRET_KEY"] = os.getenv(
 
 
 # =====================================================
-# AUTH HELPER
+# AUTH HELPERS
 # =====================================================
 def require_login():
     return session.get("user_id") is not None
@@ -27,45 +27,50 @@ def current_user():
 
 
 # =====================================================
-# HOME PAGE
+# HOME PAGE (SAFE FOR EMPTY DB)
 # =====================================================
 @app.route("/")
 def index():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("SELECT id, name FROM channels")
-    channels = cur.fetchall()
+    try:
+        cur.execute("SELECT id, name FROM channels")
+        channels = cur.fetchall() or []
 
-    cur.execute("""
-        SELECT
-            t.id,
-            t.title,
-            t.content,
-            u.username,
-            t.created_at
-        FROM threads t
-        JOIN users u ON t.user_id = u.id
-        ORDER BY t.id DESC
-    """)
-    threads = cur.fetchall()
+        cur.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.content,
+                u.username,
+                t.created_at
+            FROM threads t
+            JOIN users u ON t.user_id = u.id
+            ORDER BY t.id DESC
+        """)
+        threads = cur.fetchall() or []
 
-    cur.execute("""
-        SELECT
-            m.id,
-            m.content,
-            u.username,
-            c.name,
-            m.created_at
-        FROM messages m
-        JOIN users u ON m.author_id = u.id
-        JOIN channels c ON m.channel_id = c.id
-        ORDER BY m.id DESC
-    """)
-    messages = cur.fetchall()
+        cur.execute("""
+            SELECT
+                m.id,
+                m.content,
+                u.username,
+                c.name,
+                m.created_at
+            FROM messages m
+            JOIN users u ON m.author_id = u.id
+            JOIN channels c ON m.channel_id = c.id
+            ORDER BY m.id DESC
+        """)
+        messages = cur.fetchall() or []
 
-    cur.close()
-    conn.close()
+    except Exception as e:
+        channels, threads, messages = [], [], []
+
+    finally:
+        cur.close()
+        conn.close()
 
     return render_template(
         "forum.html",
@@ -79,7 +84,7 @@ def index():
 
 
 # =====================================================
-# CREATE THREAD
+# CREATE THREAD (SAFE)
 # =====================================================
 @app.route("/threads", methods=["POST"])
 def create_thread():
@@ -95,42 +100,54 @@ def create_thread():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        INSERT INTO threads (title, content, user_id)
-        VALUES (%s, %s, %s)
-    """, (title, content, current_user()))
+    try:
+        cur.execute("""
+            INSERT INTO threads (title, content, user_id)
+            VALUES (%s, %s, %s)
+        """, (title, content, current_user()))
 
-    conn.commit()
-    cur.close()
-    conn.close()
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        return jsonify({"error": "Failed to create thread"}), 500
+
+    finally:
+        cur.close()
+        conn.close()
 
     return redirect("/")
 
 
 # =====================================================
-# VIEW THREAD
+# VIEW THREAD (SAFE)
 # =====================================================
 @app.route("/threads/<int:thread_id>")
 def view_thread(thread_id):
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT
-            t.id,
-            t.title,
-            t.content,
-            u.username,
-            t.created_at
-        FROM threads t
-        JOIN users u ON t.user_id = u.id
-        WHERE t.id = %s
-    """, (thread_id,))
+    try:
+        cur.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.content,
+                u.username,
+                t.created_at
+            FROM threads t
+            JOIN users u ON t.user_id = u.id
+            WHERE t.id = %s
+        """, (thread_id,))
 
-    thread = cur.fetchone()
+        thread = cur.fetchone()
 
-    cur.close()
-    conn.close()
+    except Exception:
+        thread = None
+
+    finally:
+        cur.close()
+        conn.close()
 
     if not thread:
         return "Thread not found", 404
@@ -145,7 +162,7 @@ def view_thread(thread_id):
 
 
 # =====================================================
-# CREATE REPLY
+# CREATE REPLY (SAFE)
 # =====================================================
 @app.route("/replies", methods=["POST"])
 def create_reply():
@@ -161,20 +178,27 @@ def create_reply():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        INSERT INTO replies (thread_id, user_id, content)
-        VALUES (%s, %s, %s)
-    """, (thread_id, current_user(), content))
+    try:
+        cur.execute("""
+            INSERT INTO replies (thread_id, user_id, content)
+            VALUES (%s, %s, %s)
+        """, (thread_id, current_user(), content))
 
-    conn.commit()
-    cur.close()
-    conn.close()
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        return jsonify({"error": "Failed to create reply"}), 500
+
+    finally:
+        cur.close()
+        conn.close()
 
     return jsonify({"success": True})
 
 
 # =====================================================
-# GET REPLIES
+# GET REPLIES (SAFE EMPTY RESPONSE)
 # =====================================================
 @app.route("/api/replies/<int:thread_id>")
 def get_replies(thread_id):
@@ -182,22 +206,27 @@ def get_replies(thread_id):
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT
-            r.id,
-            r.content,
-            u.username,
-            r.created_at
-        FROM replies r
-        JOIN users u ON r.user_id = u.id
-        WHERE r.thread_id = %s
-        ORDER BY r.id ASC
-    """, (thread_id,))
+    try:
+        cur.execute("""
+            SELECT
+                r.id,
+                r.content,
+                u.username,
+                r.created_at
+            FROM replies r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.thread_id = %s
+            ORDER BY r.id ASC
+        """, (thread_id,))
 
-    rows = cur.fetchall()
+        rows = cur.fetchall() or []
 
-    cur.close()
-    conn.close()
+    except Exception:
+        rows = []
+
+    finally:
+        cur.close()
+        conn.close()
 
     return jsonify([
         {
@@ -211,7 +240,7 @@ def get_replies(thread_id):
 
 
 # =====================================================
-# SEND MESSAGE
+# SEND MESSAGE (SAFE)
 # =====================================================
 @app.route("/send", methods=["POST"])
 def send():
@@ -226,46 +255,56 @@ def send():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT id FROM channels WHERE name = 'general' LIMIT 1
-    """)
-    channel = cur.fetchone()
+    try:
+        cur.execute("""
+            SELECT id FROM channels LIMIT 1
+        """)
+        channel = cur.fetchone()
 
-    if not channel:
+        if not channel:
+            return "No channels available", 500
+
+        cur.execute("""
+            INSERT INTO messages (channel_id, author_id, content)
+            VALUES (%s, %s, %s)
+        """, (channel[0], current_user(), content))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        return "Failed to send message", 500
+
+    finally:
         cur.close()
         conn.close()
-        return "Channel not found", 500
-
-    cur.execute("""
-        INSERT INTO messages (channel_id, author_id, content)
-        VALUES (%s, %s, %s)
-    """, (channel[0], current_user(), content))
-
-    conn.commit()
-    cur.close()
-    conn.close()
 
     return redirect("/")
 
 
 # =====================================================
-# GUEST LOGIN (SAFER)
+# GUEST LOGIN (SAFE)
 # =====================================================
 @app.route("/guest-login")
 def guest_login():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT id, username
-        FROM users
-        WHERE username = 'guest'
-        LIMIT 1
-    """)
-    user = cur.fetchone()
+    try:
+        cur.execute("""
+            SELECT id, username
+            FROM users
+            WHERE username = 'guest'
+            LIMIT 1
+        """)
+        user = cur.fetchone()
 
-    cur.close()
-    conn.close()
+    except Exception:
+        user = None
+
+    finally:
+        cur.close()
+        conn.close()
 
     if not user:
         return "Guest account not found", 500
@@ -289,16 +328,21 @@ def login():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT id, username
-        FROM users
-        WHERE username = %s
-    """, (username,))
+    try:
+        cur.execute("""
+            SELECT id, username
+            FROM users
+            WHERE username = %s
+        """, (username,))
 
-    user = cur.fetchone()
+        user = cur.fetchone()
 
-    cur.close()
-    conn.close()
+    except Exception:
+        user = None
+
+    finally:
+        cur.close()
+        conn.close()
 
     if not user:
         return "User not found", 404

@@ -1,4 +1,4 @@
- import os
+import os
 from flask import Flask, render_template, request, redirect, session, jsonify
 
 from db import get_conn
@@ -7,12 +7,19 @@ from auth import get_identity
 app = Flask(__name__)
 
 # =====================================================
-# CONFIG (RAILWAY POSTGRES SAFE)
+# CONFIG
 # =====================================================
 app.config["SECRET_KEY"] = os.getenv(
     "SECRET_KEY",
     "dev-secret-key-change-this"
 )
+
+
+# =====================================================
+# AUTH HELPER (CENTRALIZED PERMISSION CHECK)
+# =====================================================
+def require_login():
+    return session.get("user_id") is not None
 
 
 # =====================================================
@@ -23,11 +30,9 @@ def index():
     conn = get_conn()
     cur = conn.cursor()
 
-    # Channels
     cur.execute("SELECT id, name FROM channels")
     channels = cur.fetchall()
 
-    # Threads
     cur.execute("""
         SELECT
             t.id,
@@ -41,7 +46,6 @@ def index():
     """)
     threads = cur.fetchall()
 
-    # Messages (global chat)
     cur.execute("""
         SELECT
             m.id,
@@ -71,12 +75,12 @@ def index():
 
 
 # =====================================================
-# CREATE THREAD
+# CREATE THREAD (PROTECTED)
 # =====================================================
 @app.route("/threads", methods=["POST"])
 def create_thread():
-    if "user_id" not in session:
-        return "Not allowed (logged out)", 403
+    if not require_login():
+        return "Unauthorized", 403
 
     title = request.form.get("title")
     content = request.form.get("content")
@@ -100,14 +104,13 @@ def create_thread():
 
 
 # =====================================================
-# VIEW THREAD PAGE
+# VIEW THREAD
 # =====================================================
 @app.route("/threads/<int:thread_id>")
 def view_thread(thread_id):
     conn = get_conn()
     cur = conn.cursor()
 
-    # Thread
     cur.execute("""
         SELECT
             t.id,
@@ -122,13 +125,11 @@ def view_thread(thread_id):
 
     thread = cur.fetchone()
 
-    if not thread:
-        cur.close()
-        conn.close()
-        return "Thread not found", 404
-
     cur.close()
     conn.close()
+
+    if not thread:
+        return "Thread not found", 404
 
     return render_template(
         "thread.html",
@@ -140,12 +141,12 @@ def view_thread(thread_id):
 
 
 # =====================================================
-# CREATE REPLY (POSTGRES + API STYLE FIX)
+# CREATE REPLY (PROTECTED)
 # =====================================================
 @app.route("/replies", methods=["POST"])
 def create_reply():
-    if "user_id" not in session:
-        return jsonify({"error": "Not logged in"}), 401
+    if not require_login():
+        return jsonify({"error": "Unauthorized"}), 401
 
     content = request.form.get("content")
     thread_id = request.form.get("thread_id")
@@ -169,7 +170,7 @@ def create_reply():
 
 
 # =====================================================
-# GET REPLIES API (CONVERSATION SYSTEM)
+# GET REPLIES
 # =====================================================
 @app.route("/api/replies/<int:thread_id>")
 def get_replies(thread_id):
@@ -206,12 +207,12 @@ def get_replies(thread_id):
 
 
 # =====================================================
-# CHANNEL CHAT SYSTEM
+# SEND MESSAGE (PROTECTED)
 # =====================================================
 @app.route("/send", methods=["POST"])
 def send():
-    if "user_id" not in session:
-        return "Not allowed (logged out)", 403
+    if not require_login():
+        return "Unauthorized", 403
 
     content = request.form.get("content")
 
@@ -262,7 +263,7 @@ def guest_login():
     if not user:
         cur.close()
         conn.close()
-        return "Guest user not found", 500
+        return "Guest not found", 500
 
     session["user_id"] = user[0]
     session["username"] = user[1]

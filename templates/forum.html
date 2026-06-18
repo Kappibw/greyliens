@@ -6,33 +6,92 @@
     <style>
         body {
             font-family: Arial;
+            background: #f4f4f4;
         }
 
         .container {
             width: 60%;
             margin: auto;
+            margin-top: 20px;
         }
 
         .top-bar {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
+            padding: 12px;
             border-bottom: 1px solid #ccc;
+            background: white;
         }
 
         .thread-box {
             border: 1px solid #ddd;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 10px;
             border-radius: 6px;
+            background: white;
+        }
+
+        .thread-box a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .thread-box a:hover {
+            text-decoration: underline;
+        }
+
+        small {
+            color: #888;
         }
 
         .channel {
             color: gray;
         }
 
-        small {
-            color: #888;
+        h4 {
+            margin: 0;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        .login-box input {
+            padding: 6px;
+        }
+
+        .login-box button {
+            padding: 6px 10px;
+        }
+
+        .form-box {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .form-box input,
+        .form-box textarea,
+        .form-box select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .form-box button {
+            padding: 8px 12px;
+        }
+
+        hr {
+            margin: 20px 0;
+        }
+
+        .empty {
+            color: #777;
+            font-style: italic;
         }
     </style>
 </head>
@@ -42,94 +101,112 @@
 <div class="top-bar">
     <h2>Greyliens Forum</h2>
 
-    <div>
+    <div class="login-box">
+
         {% if identity == "logged_out" %}
-            Not logged in
+
+            <form action="/login" method="POST">
+                <input name="username" placeholder="Enter username" required>
+                <button type="submit">Login</button>
+            </form>
+
         {% else %}
-            {{ user }}
+
+            Logged in as: <strong>{{ user }}</strong>
+            <a href="/logout">Logout</a>
+
         {% endif %}
+
     </div>
 </div>
 
 <div class="container">
 
-<!-- LOGIN -->
-{% if identity == "logged_out" %}
+    <!-- CREATE THREAD -->
+    {% if identity != "logged_out" %}
+    <div class="form-box">
+        <h3>Create Thread</h3>
 
-<form method="POST" action="/login">
-    <input name="username" placeholder="Username">
-    <button>Login</button>
-</form>
+        <form action="/create_thread" method="POST">
+            <input name="title" placeholder="Thread title" required>
+            <textarea name="content" placeholder="Thread content" required></textarea>
+            <input name="channel" placeholder="Channel (optional)">
+            <button type="submit">Post Thread</button>
+        </form>
+    </div>
+    {% endif %}
 
-<a href="/guest-login">
-    <button>Guest</button>
-</a>
+    <!-- THREADS -->
+    <h3>Threads</h3>
 
-{% else %}
+    {% if threads|length == 0 %}
+        <p class="empty">No threads yet.</p>
+    {% endif %}
 
-<p>Logged in as {{ user }}</p>
-<a href="/logout">Logout</a>
+    {% for thread in threads %}
 
-{% endif %}
+    <div class="thread-box">
 
-<hr>
+        <a href="/threads/{{ thread[0] }}">
+            <h4>{{ thread[1] }}</h4>
+        </a>
 
-<!-- THREAD FORM -->
-{% if identity != "logged_out" %}
-<h3>Create Thread</h3>
+        <p>{{ thread[2] }}</p>
 
-<form method="POST" action="/threads">
-    <input name="title" placeholder="Title" required>
-    <br><br>
-    <textarea name="content" placeholder="Content" required></textarea>
-    <br><br>
-    <button>Create</button>
-</form>
+        <small>
+            Posted by {{ thread[3] }}
+            {% if thread[4] %}
+                | {{ thread[4] }}
+            {% endif %}
+        </small>
 
-<hr>
-{% endif %}
+    </div>
 
-<!-- THREADS -->
-<h2>Threads</h2>
-
-{% if threads %}
-    {% for t in threads %}
-        <div class="thread-box">
-            <h3>{{ t[1] }}</h3>
-            <p>{{ t[2] }}</p>
-            <small>By {{ t[3] }} • {{ t[4] }}</small>
-        </div>
     {% endfor %}
-{% else %}
-    <p>No threads yet.</p>
-{% endif %}
 
-<hr>
+    <hr>
 
-<!-- MESSAGE FORM -->
-{% if identity != "logged_out" %}
-<form method="POST" action="/send">
-    <input name="content" placeholder="Message">
-    <button>Send</button>
-</form>
-{% endif %}
+    <!-- MESSAGES -->
+    <h3>Messages</h3>
 
-<!-- MESSAGES -->
-<h2>Messages</h2>
+    {% if messages|length == 0 %}
+        <p class="empty">No messages yet.</p>
+    {% endif %}
 
-{% if messages %}
-    <ul>
-        {% for m in messages %}
-            <li>
-                <b>{{ m[2] }}</b> in #{{ m[3] }}<br>
-                {{ m[1] }}<br>
-                <small>{{ m[4] }}</small>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No messages yet.</p>
-{% endif %}
+    {% for message in messages %}
+
+    <div class="thread-box">
+
+        <strong>{{ message[2] }}</strong>
+        <span class="channel">in {{ message[3] }}</span>
+
+        <p>{{ message[1] }}</p>
+
+        <small>{{ message[4] }}</small>
+
+    </div>
+
+    {% endfor %}
+
+    <!-- CREATE MESSAGE -->
+    {% if identity != "logged_out" %}
+    <div class="form-box">
+        <h3>Post Message</h3>
+
+        <form action="/create_message" method="POST">
+            <textarea name="message" placeholder="Write a message..." required></textarea>
+
+            <select name="channel" required>
+                <option value="">Select channel</option>
+                {% for thread in threads %}
+                    <option value="{{ thread[1] }}">{{ thread[1] }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    {% endif %}
 
 </div>
 

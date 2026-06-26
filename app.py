@@ -9,7 +9,11 @@ app = Flask(__name__)
 # Used by Flask to securely sign session cookies.
 # The value should be provided through environment variables.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-
+#check if the secret key environment variable is set
+if not app.config["SECRET_KEY"]:
+    raise ValueError("Environment variable 'SECRET_KEY' is not set")
+else:
+    print("SECRET_KEY is set")
 print("APP FILE:", os.path.abspath(__file__))
 print("TEMPLATE FOLDER:", app.template_folder)
 

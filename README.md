@@ -207,8 +207,15 @@ DBGate was used to:
 ---
 
 ## Status
-
+ identity-system
 The application is fully functional with:
+=======
+The application is fully connected to a Railway PostgreSQL database and successfully renders dynamic data from the database in a Flask web interface.
+
+---
+
+
+main
 
 * Railway PostgreSQL integration
 * Session-based identity system

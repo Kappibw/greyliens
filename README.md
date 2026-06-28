@@ -88,7 +88,19 @@ See `schema.md` for the database schema.
 
 ## Notes
 
-* This MVP uses username-based login without passwords.
-* Database credentials are stored using environment variables.
-* The application uses a Railway-hosted PostgreSQL database.
+* No passwords are used (MVP design choice)
+* Session is the only source of truth for authentication
+* No credentials are hardcoded in the codebase
+* Application assumes a preconfigured Railway PostgreSQL database
+
+---
+
+## Status
+
+The application is fully functional with:
+
+* Railway PostgreSQL integration
+* Session-based identity system
+* Working login, guest login, and logout
+* Dynamic message rendering from database
 

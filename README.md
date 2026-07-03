@@ -1,32 +1,21 @@
-
 # Chat Forum MVP – Flask + PostgreSQL (Railway)
 
 ## Overview
 
-This project is a Flask-based chat forum application connected to a PostgreSQL database hosted on Railway.
-
-It demonstrates:
-
-* Secure database connection using environment variables
-* Retrieval of messages using SQL JOIN queries
-* Display of database-driven content in a Flask web interface
-* Basic relational database structure (users, channels, messages)
-
----
+A simple Flask chat forum built with Flask and PostgreSQL hosted on Railway. Users can log in, browse forum messages, and post messages stored in the database.
 
 ## Features
 
 * Flask web application
-* Railway-hosted PostgreSQL database
-* Environment variable configuration using `DATABASE_URL`
-* Relational SQL queries using JOINs
-* Dynamic rendering of messages from the database
-
----
+* PostgreSQL database hosted on Railway
+* Username-based login (MVP)
+* Guest login
+* Session-based authentication
+* Dynamic forum messages
 
 ## Project Structure
 
-```
+```text
 app.py
 templates/
     forum.html
@@ -35,134 +24,83 @@ README.md
 screenshots/
 ```
 
----
+## Installation
 
-## Database Schema
+1. Clone the repository.
 
-The database contains three main tables:
+```bash
+git clone <repository-url>
+cd <repository-folder>
+```
 
-* users
-* channels
-* messages
+2. Create and activate a virtual environment.
 
-### Relationships
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
 
-* A user can create many messages
-* A channel can contain many messages
-* Each message belongs to one user and one channel
+3. Install the required packages.
 
----
+```bash
+pip install -r requirements.txt
+```
 
 ## Environment Variables
 
-This project requires a PostgreSQL connection string from Railway.
+This application requires the following environment variables:
 
-Set the environment variable:
-
-### Windows (PowerShell)
-
-```
-setx DATABASE_URL "your_railway_postgres_connection_string"
+```env
+SECRET_KEY=your-secret-key
+DATABASE_URL=your-railway-postgresql-url
 ```
 
-Then restart your terminal.
+The application reads these values using `os.getenv(...).strip()` before configuring Flask and connecting to the Railway PostgreSQL database.
 
----
+* `SECRET_KEY` – Used by Flask to manage sessions.
+* `DATABASE_URL` – Connection string for the Railway PostgreSQL database.
 
-## Installation
-
-Install dependencies:
-
-```
-pip install flask psycopg2-binary
-```
-
----
+If deploying on Railway, add both variables in your Railway project's **Variables** tab.
 
 ## Running the Application
 
-Start the Flask server:
+Start the Flask development server:
 
-```
+```bash
 python app.py
 ```
 
-Open in browser:
+Then open your browser and visit:
 
+```text
+http://127.0.0.1:5000
 ```
-http://127.0.0.1:5000/
-```
 
----
+## Database
 
-## Database Query Logic
+The application uses the following tables:
 
-The application retrieves messages using SQL JOIN queries:
+* `users`
+* `channels`
+* `messages`
 
-* messages table (content, timestamps)
-* users table (username)
-* channels table (channel name)
-
-This ensures normalized relational data is displayed correctly.
-
----
-
-## Database Inspection
-
-DBGate was used to:
-
-* Inspect database tables
-* Verify relationships between entities
-* Confirm inserted records
-* Validate query output
-
----
-
-## Screenshots
-
-
-* DBGate: users table
-* DBGate: channels table
-* DBGate: messages table
-* Flask UI showing messages loaded from database
-
----
-
-## Troubleshooting
-
-### Database not connecting
-
-Ensure `DATABASE_URL` is correctly set in environment variables.
-
-### No messages displayed
-
-Check that the `messages` table contains data.
-
-### SQL errors
-
-Ensure tables exist and relationships match schema.
-
----
+See `schema.md` for the database schema.
 
 ## Notes
 
-* No credentials are hardcoded in the application
-* Database access is handled using environment variables
-* The root route `/` displays all messages from the database
-* The application assumes a preconfigured Railway PostgreSQL database
+* No passwords are used (MVP design choice)
+* Session is the only source of truth for authentication
+* No credentials are hardcoded in the codebase
+* Application assumes a preconfigured Railway PostgreSQL database
 
 ---
 
 ## Status
 
-The application is fully connected to a Railway PostgreSQL database and successfully renders dynamic data from the database in a Flask web interface.
+The application is fully functional with:
 
----
+* Railway PostgreSQL integration
+* Session-based identity system
+* Working login, guest login, and logout
+* Dynamic message rendering from database
 
-If you want next, I can help you:
-
-* fix final Git push (so you don’t break again)
-* or verify your PR before submission
-* or check your screenshots match grading requirements
-
-Just tell me 👍

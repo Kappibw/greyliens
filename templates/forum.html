@@ -32,10 +32,10 @@
     <div class="identity">
         {% if identity == "logged_out" %}
             Not logged in
-        {% elif user %}
-            {{ user }}
-        {% else %}
+        {% elif identity == "guest" %}
             Guest
+        {% elif identity == "db_user" %}
+            {{ user }}
         {% endif %}
     </div>
 </div>
@@ -48,7 +48,12 @@
     <h3>Login</h3>
 
     <form method="POST" action="/login">
-        <input type="text" name="username" placeholder="Username" required>
+        <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            required
+        >
         <button type="submit">Login</button>
     </form>
 
@@ -63,10 +68,10 @@
     <p>
         Logged in as:
         <b>
-            {% if user %}
-                {{ user }}
-            {% else %}
+            {% if identity == "guest" %}
                 Guest
+            {% else %}
+                {{ user }}
             {% endif %}
         </b>
     </p>
@@ -85,7 +90,12 @@
     <h3>Post a Message</h3>
 
     <form method="POST" action="/send">
-        <input type="text" name="content" placeholder="Type message" required>
+        <input
+            type="text"
+            name="content"
+            placeholder="Type message"
+            required
+        >
         <button type="submit">Send</button>
     </form>
 

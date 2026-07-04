@@ -8,6 +8,23 @@
             font-family: Arial, sans-serif;
         }
 
+        .layout {
+            display: flex;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 20%;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            width: 80%;
+            padding: 10px;
+        }
+
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -18,11 +35,6 @@
 
         .identity {
             font-weight: bold;
-        }
-
-        .container {
-            width: 60%;
-            margin: auto;
         }
 
         ul {
@@ -54,92 +66,118 @@
     <div class="identity">
         {% if identity == "logged_out" %}
             Not logged in
-        {% elif user %}
-            {{ user }}
-        {% else %}
+        {% elif identity == "guest" %}
             Guest
+        {% else %}
+            {{ user }}
         {% endif %}
     </div>
 </div>
 
-<div class="container">
+<!-- MAIN LAYOUT -->
+<div class="layout">
 
-<!-- LOGIN / LOGOUT -->
-{% if identity == "logged_out" %}
+    <!-- SIDEBAR (CHANNELS) -->
+    <div class="sidebar">
+        <h3>Channels</h3>
 
-    <h3>Login</h3>
+        <ul>
+            {% if channels %}
+                {% for c in channels %}
+                    <li>#{{ c[1] }}</li>
+                {% endfor %}
+            {% else %}
+                <li>No channels</li>
+            {% endif %}
+        </ul>
+    </div>
 
-    <form method="POST" action="/login">
-        <input type="text" name="username" placeholder="Username" required>
-        <button type="submit">Login</button>
-    </form>
+    <!-- MAIN CONTENT -->
+    <div class="main">
 
-    <br>
+        <!-- LOGIN / LOGOUT -->
+        {% if identity == "logged_out" %}
 
-    <a href="/guest-login">
-        <button type="button">Continue as Guest</button>
-    </a>
+            <h3>Login</h3>
 
-{% else %}
+            <form method="POST" action="/login">
+                <input type="text" name="username" placeholder="Username" required>
+                <button type="submit">Login</button>
+            </form>
 
-    <p>
-        Logged in as:
-        <b>{{ user }}</b>
-    </p>
+            <br>
 
-    <a href="/logout">
-        <button type="button">Logout</button>
-    </a>
+            <a href="/guest-login">
+                <button type="button">Continue as Guest</button>
+            </a>
 
-{% endif %}
+        {% else %}
 
-<hr>
+            <p>
+                Logged in as:
+                <b>
+                    {% if identity == "guest" %}
+                        Guest
+                    {% else %}
+                        {{ user }}
+                    {% endif %}
+                </b>
+            </p>
 
-<!-- MESSAGE FORM -->
-{% if identity != "logged_out" %}
+            <a href="/logout">
+                <button type="button">Logout</button>
+            </a>
 
-    <h3>Post a Message</h3>
+        {% endif %}
 
-    <form method="POST" action="/send">
-        <input type="text" name="content" placeholder="Type message" required>
-        <button type="submit">Send</button>
-    </form>
+        <hr>
 
-{% else %}
+        <!-- MESSAGE FORM -->
+        {% if identity != "logged_out" %}
 
-    <p>You must log in before posting messages.</p>
+            <h3>Post a Message</h3>
 
-{% endif %}
+            <form method="POST" action="/send">
+                <input type="text" name="content" placeholder="Type message" required>
+                <button type="submit">Send</button>
+            </form>
 
-<hr>
+        {% else %}
 
-<!-- MESSAGES -->
-<h2>Messages</h2>
+            <p>You must log in before posting messages.</p>
 
-{% if messages %}
+        {% endif %}
 
-    <ul>
-        {% for msg in messages %}
-            <li>
-                <strong>{{ msg[2] }}</strong>
-                in <strong class="channel">#{{ msg[3] }}</strong>
-                <br><br>
+        <hr>
 
-                {{ msg[1] }}
+        <!-- MESSAGES -->
+        <h2>Messages</h2>
 
-                <br><br>
+        {% if messages %}
 
-                <!-- SAFE timestamp (no crash) -->
-                <small>{{ msg[4] }}</small>
-            </li>
-        {% endfor %}
-    </ul>
+            <ul>
+                {% for msg in messages %}
+                    <li>
+                        <strong>{{ msg[2] }}</strong>
+                        in <strong class="channel">#{{ msg[3] }}</strong>
+                        <br><br>
 
-{% else %}
+                        {{ msg[1] }}
 
-    <p>No messages yet.</p>
+                        <br><br>
 
-{% endif %}
+                        <small>{{ msg[4] }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+
+            <p>No messages yet.</p>
+
+        {% endif %}
+
+    </div>
 
 </div>
 

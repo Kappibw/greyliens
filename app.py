@@ -6,45 +6,55 @@ from auth import get_identity
 
 app = Flask(__name__)
 
-# Used by Flask to securely sign session cookies.
-# The value should be provided through environment variables.
+# -----------------------
+# SECURITY CONFIG
+# -----------------------
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-#Check if the secret key environment variable is set
+
 if not app.config["SECRET_KEY"]:
     raise ValueError("Environment variable 'SECRET_KEY' is not set")
-else:
-    print("SECRET_KEY is set")
+
+print("SECRET_KEY is set")
 print("APP FILE:", os.path.abspath(__file__))
 print("TEMPLATE FOLDER:", app.template_folder)
 
 
 # -----------------------
-# HOME / MESSAGES (READ-ONLY UI)
+# HOME / READ-ONLY UI
 # -----------------------
 @app.route("/")
 def index():
     """
-    Displays the forum homepage with database content.
+    Displays forum homepage with DB content.
+    Read-only view (channels + messages).
     """
+
     print("SESSION:", dict(session))
     print("IDENTITY:", get_identity())
 
     conn = get_conn()
     cur = conn.cursor()
 
-    # Load channels
-    cur.execute("SELECT id, name FROM channels")
+    # -----------------------
+    # LOAD CHANNELS (SIDEBAR)
+    # -----------------------
+    cur.execute("""
+        SELECT id, name
+        FROM channels
+        ORDER BY id;
+    """)
     channels = cur.fetchall()
 
-    # Load messages (threads)
+    # -----------------------
+    # LOAD MESSAGES (THREADS)
+    # -----------------------
     cur.execute("""
         SELECT m.id, m.content, u.username, c.name, m.created_at
         FROM messages m
         JOIN users u ON m.author_id = u.id
         JOIN channels c ON m.channel_id = c.id
-        ORDER BY m.id DESC
+        ORDER BY m.id DESC;
     """)
-
     messages = cur.fetchall()
 
     cur.close()
@@ -64,6 +74,11 @@ def index():
 # -----------------------
 @app.route("/send", methods=["POST"])
 def send():
+    """
+    Creates a new message in the general channel.
+    Only allowed for logged-in or guest users.
+    """
+
     if "user_id" not in session:
         return "Not allowed (logged out)", 403
 
@@ -77,9 +92,12 @@ def send():
 
     user_id = session["user_id"]
 
-    cur.execute(
-        "SELECT id FROM channels WHERE name = 'general' LIMIT 1;"
-    )
+    cur.execute("""
+        SELECT id
+        FROM channels
+        WHERE name = 'general'
+        LIMIT 1;
+    """)
 
     channel = cur.fetchone()
 
@@ -108,12 +126,16 @@ def send():
 # -----------------------
 @app.route("/guest-login")
 def guest_login():
+
     conn = get_conn()
     cur = conn.cursor()
-
-    cur.execute(
-        "SELECT id FROM users WHERE username = 'guest' LIMIT 1;"
-    )
+    
+    cur.execute("""
+        SELECT id
+        FROM users
+        WHERE username = 'guest'
+        LIMIT 1;
+    """)
 
     user = cur.fetchone()
 
@@ -134,6 +156,7 @@ def guest_login():
 # -----------------------
 @app.route("/login", methods=["POST"])
 def login():
+
     username = request.form.get("username")
 
     if not username:
@@ -142,10 +165,11 @@ def login():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute(
-        "SELECT id, username FROM users WHERE username = %s;",
-        (username,)
-    )
+    cur.execute("""
+        SELECT id, username
+        FROM users
+        WHERE username = %s;
+    """, (username,))
 
     user = cur.fetchone()
 

@@ -2,29 +2,47 @@
 <html>
 <head>
     <title>Greyliens Forum</title>
+
+    <style>
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .identity {
+            font-weight: bold;
+        }
+
+        .container {
+            width: 60%;
+            margin: auto;
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>Greyliens Forum</h1>
+<div class="top-bar">
+    <h2>Greyliens Forum</h2>
 
-<!-- User Information -->
-<p>
-    Current User:
-    {% if user %}
-        <b>{{ user }}</b>
-    {% else %}
-        <b>Not logged in</b>
-    {% endif %}
-</p>
+    <!-- Top-right identity display -->
+    <div class="identity">
+        {% if identity == "logged_out" %}
+            Not logged in
+        {% elif identity == "guest" %}
+            Guest
+        {% elif identity == "db_user" %}
+            {{ user }}
+        {% endif %}
+    </div>
+</div>
 
-<p>
-    Identity State:
-    <b>{{ identity }}</b>
-</p>
+<div class="container">
 
-<hr>
-
-<!-- Login / Logout Controls -->
+<!-- LOGIN / LOGOUT SECTION -->
 {% if identity == "logged_out" %}
 
     <h3>Login</h3>
@@ -47,7 +65,16 @@
 
 {% else %}
 
-    <p>Logged in as <b>{{ user }}</b></p>
+    <p>
+        Logged in as:
+        <b>
+            {% if identity == "guest" %}
+                Guest
+            {% else %}
+                {{ user }}
+            {% endif %}
+        </b>
+    </p>
 
     <a href="/logout">
         <button type="button">Logout</button>
@@ -57,7 +84,7 @@
 
 <hr>
 
-<!-- Message Form -->
+<!-- MESSAGE FORM -->
 {% if identity != "logged_out" %}
 
     <h3>Post a Message</h3>
@@ -80,33 +107,20 @@
 
 <hr>
 
-<!-- Messages -->
+<!-- MESSAGES -->
 <h2>Messages</h2>
 
 {% if messages %}
 
     <ul>
         {% for msg in messages %}
-            <li style="margin-bottom: 12px;">
-
+            <li style="margin-bottom: 10px;">
                 <strong>{{ msg[2] }}</strong>
-                in
-                <strong>#{{ msg[3] }}</strong>
-
+                in <strong>#{{ msg[3] }}</strong>
                 <br>
-
                 {{ msg[1] }}
-
                 <br>
-
-                <small>
-                    {% if msg[4] %}
-                        {{ msg[4].strftime('%Y-%m-%d %H:%M') }}
-                    {% else %}
-                        No timestamp
-                    {% endif %}
-                </small>
-
+                <small>{{ msg[4].strftime('%Y-%m-%d %H:%M') }}</small>
             </li>
         {% endfor %}
     </ul>
@@ -116,6 +130,8 @@
     <p>No messages yet.</p>
 
 {% endif %}
+
+</div>
 
 </body>
 </html>

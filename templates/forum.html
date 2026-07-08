@@ -68,7 +68,7 @@
             Not logged in
         {% elif identity == "guest" %}
             Guest
-        {% else %}
+        {% elif identity == "db_user" %}
             {{ user }}
         {% endif %}
     </div>
@@ -100,10 +100,15 @@
 
             <h3>Login</h3>
 
-            <form method="POST" action="/login">
-                <input type="text" name="username" placeholder="Username" required>
-                <button type="submit">Login</button>
-            </form>
+    <form method="POST" action="/login">
+        <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            required
+        >
+        <button type="submit">Login</button>
+    </form>
 
             <br>
 
@@ -113,16 +118,16 @@
 
         {% else %}
 
-            <p>
-                Logged in as:
-                <b>
-                    {% if identity == "guest" %}
-                        Guest
-                    {% else %}
-                        {{ user }}
-                    {% endif %}
-                </b>
-            </p>
+    <p>
+        Logged in as:
+        <b>
+            {% if identity == "guest" %}
+                Guest
+            {% else %}
+                {{ user }}
+            {% endif %}
+        </b>
+    </p>
 
             <a href="/logout">
                 <button type="button">Logout</button>
@@ -137,10 +142,15 @@
 
             <h3>Post a Message</h3>
 
-            <form method="POST" action="/send">
-                <input type="text" name="content" placeholder="Type message" required>
-                <button type="submit">Send</button>
-            </form>
+    <form method="POST" action="/send">
+        <input
+            type="text"
+            name="content"
+            placeholder="Type message"
+            required
+        >
+        <button type="submit">Send</button>
+    </form>
 
         {% else %}
 

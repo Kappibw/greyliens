@@ -26,8 +26,3 @@ def get_identity():
     return "db_user"
 
 
-def get_username():
-    """
-    Safely returns the current username for UI display.
-    """
-    return session.get("username", None)

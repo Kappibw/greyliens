@@ -45,7 +45,9 @@
     <div>
         {% if identity == "logged_out" %}
             Not logged in
-        {% else %}
+        {% elif identity == "guest" %}
+            Guest
+        {% elif identity == "db_user" %}
             {{ user }}
         {% endif %}
     </div>
@@ -56,10 +58,17 @@
 <!-- LOGIN -->
 {% if identity == "logged_out" %}
 
-<form method="POST" action="/login">
-    <input name="username" placeholder="Username">
-    <button>Login</button>
-</form>
+    <form method="POST" action="/login">
+        <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            required
+        >
+        <button type="submit">Login</button>
+    </form>
+
+    <br>
 
 <a href="/guest-login">
     <button>Guest</button>
@@ -67,8 +76,20 @@
 
 {% else %}
 
-<p>Logged in as {{ user }}</p>
-<a href="/logout">Logout</a>
+    <p>
+        Logged in as:
+        <b>
+            {% if identity == "guest" %}
+                Guest
+            {% else %}
+                {{ user }}
+            {% endif %}
+        </b>
+    </p>
+
+    <a href="/logout">
+        <button type="button">Logout</button>
+    </a>
 
 {% endif %}
 
@@ -78,13 +99,15 @@
 {% if identity != "logged_out" %}
 <h3>Create Thread</h3>
 
-<form method="POST" action="/threads">
-    <input name="title" placeholder="Title" required>
-    <br><br>
-    <textarea name="content" placeholder="Content" required></textarea>
-    <br><br>
-    <button>Create</button>
-</form>
+    <form method="POST" action="/send">
+        <input
+            type="text"
+            name="content"
+            placeholder="Type message"
+            required
+        >
+        <button type="submit">Send</button>
+    </form>
 
 <hr>
 {% endif %}

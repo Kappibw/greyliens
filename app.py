@@ -169,7 +169,7 @@ def guest_login():
 
 @app.route("/login", methods=["POST"])
 def login():
-     """
+    """
     Authenticates a user by username.
 
     If the username exists, the user's information is stored in session.
@@ -177,7 +177,7 @@ def login():
     username = request.form.get("username")
 
     if not username:
-    return "Username required", 400
+        return "Username required", 400
 
     conn = get_conn()
     cur = conn.cursor()
@@ -204,7 +204,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-     """
+    """
     Logs out the current user and clears session data.
     """
 

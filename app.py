@@ -6,9 +6,13 @@ from auth import get_identity
 
 app = Flask(__name__)
 
-# Security configuration
+# -----------------------
+# SECURITY CONFIG
+# -----------------------
+# Used by Flask to securely sign session cookies.
+# The value should be provided through environment variables.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-
+#Check if the secret key environment variable is set
 if not app.config["SECRET_KEY"]:
     raise ValueError("Environment variable 'SECRET_KEY' is not set")
 
@@ -16,11 +20,15 @@ print("SECRET_KEY is set")
 print("APP FILE:", os.path.abspath(__file__))
 print("TEMPLATE FOLDER:", app.template_folder)
 
-
+# -----------------------
+# HOME / MESSAGES
+# -----------------------
 @app.route("/")
 def index():
     """
     Displays forum homepage with database content.
+    Retrieves all messages from the database along with
+    their authors and channels, then renders the forum page
     """
 
     print("SESSION:", dict(session))
@@ -74,11 +82,16 @@ def index():
         user=session.get("username"),
         identity=get_identity()
     )
-
+# -----------------------
+# SEND MESSAGE
+# -----------------------
 
 @app.route("/send", methods=["POST"])
 def send():
     """
+     Creates a new message in the general channel.
+
+    Only authenticated users are allowed to submit messages.
     Creates a new message.
     """
 
@@ -126,6 +139,9 @@ def send():
 
 @app.route("/guest-login")
 def guest_login():
+    """
+    Logs a user into the application using the guest account.
+    """
 
     conn = get_conn()
     cur = conn.cursor()
@@ -153,11 +169,15 @@ def guest_login():
 
 @app.route("/login", methods=["POST"])
 def login():
+     """
+    Authenticates a user by username.
 
+    If the username exists, the user's information is stored in session.
+    """
     username = request.form.get("username")
 
     if not username:
-        return "Username required", 400
+    return "Username required", 400
 
     conn = get_conn()
     cur = conn.cursor()
@@ -184,6 +204,9 @@ def login():
 
 @app.route("/logout")
 def logout():
+     """
+    Logs out the current user and clears session data.
+    """
 
     session.clear()
 

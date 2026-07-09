@@ -6,29 +6,21 @@ from auth import get_identity
 
 app = Flask(__name__)
 
-# -----------------------
-# SECURITY CONFIG
-# -----------------------
-# Used by Flask to securely sign session cookies.
-# The value should be provided through environment variables.
+# Security configuration
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-# Check if the secret key environment variable is set
+
 if not app.config["SECRET_KEY"]:
     raise ValueError("Environment variable 'SECRET_KEY' is not set")
-else:
-    print("SECRET_KEY is set")
+
+print("SECRET_KEY is set")
 print("APP FILE:", os.path.abspath(__file__))
 print("TEMPLATE FOLDER:", app.template_folder)
 
 
-# -----------------------
-# HOME / READ-ONLY UI
-# -----------------------
 @app.route("/")
 def index():
     """
-    Displays forum homepage with DB content.
-    Read-only view (channels + messages).
+    Displays forum homepage with database content.
     """
 
     print("SESSION:", dict(session))
@@ -37,9 +29,7 @@ def index():
     conn = get_conn()
     cur = conn.cursor()
 
-    # -----------------------
-    # LOAD CHANNELS (SIDEBAR)
-    # -----------------------
+    # Load channels
     cur.execute("""
         SELECT id, name
         FROM channels
@@ -47,17 +37,31 @@ def index():
     """)
     channels = cur.fetchall()
 
-    # -----------------------
-    # LOAD MESSAGES (THREADS)
-    # -----------------------
+    # Load threads
     cur.execute("""
-        SELECT m.id, m.content, u.username, c.name, m.created_at
-        FROM messages m
-        JOIN users u ON m.author_id = u.id
-        JOIN channels c ON m.channel_id = c.id
-        ORDER BY m.id DESC;
-    """)
-    messages = cur.fetchall()
+    SELECT
+        t.id,
+        t.title,
+        t.content,
+        u.username,
+        t.created_at
+    FROM threads t
+    JOIN users u ON t.user_id = u.id
+    ORDER BY t.id DESC;
+""")
+    threads = cur.fetchall() 
+    # Load replies
+    cur.execute("""
+    SELECT
+        r.id,
+        r.content,
+        u.username,
+        r.created_at
+    FROM replies r
+    JOIN users u ON r.user_id = u.id
+    ORDER BY r.id DESC;
+""")
+    replies = cur.fetchall()
 
     cur.close()
     conn.close()
@@ -65,20 +69,17 @@ def index():
     return render_template(
         "forum.html",
         channels=channels,
-        messages=messages,
+        threads=threads,
+        replies=replies,
         user=session.get("username"),
         identity=get_identity()
     )
 
 
-# -----------------------
-# SEND MESSAGE
-# -----------------------
 @app.route("/send", methods=["POST"])
 def send():
     """
-    Creates a new message in the general channel.
-    Only allowed for logged-in or guest users.
+    Creates a new message.
     """
 
     if "user_id" not in session:
@@ -123,15 +124,12 @@ def send():
     return redirect("/")
 
 
-# -----------------------
-# GUEST LOGIN
-# -----------------------
 @app.route("/guest-login")
 def guest_login():
 
     conn = get_conn()
     cur = conn.cursor()
-    
+
     cur.execute("""
         SELECT id
         FROM users
@@ -153,9 +151,6 @@ def guest_login():
     return redirect("/")
 
 
-# -----------------------
-# LOGIN
-# -----------------------
 @app.route("/login", methods=["POST"])
 def login():
 
@@ -187,17 +182,13 @@ def login():
     return redirect("/")
 
 
-# -----------------------
-# LOGOUT
-# -----------------------
 @app.route("/logout")
 def logout():
+
     session.clear()
+
     return redirect("/")
 
 
-# -----------------------
-# RUN APP
-# -----------------------
 if __name__ == "__main__":
     app.run(debug=True)

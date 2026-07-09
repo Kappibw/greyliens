@@ -6,35 +6,37 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-        }
-
-        .layout {
-            display: flex;
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            width: 20%;
-            border-right: 1px solid #ccc;
-            padding: 10px;
-        }
-
-        /* MAIN CONTENT */
-        .main {
-            width: 80%;
-            padding: 10px;
+            margin: 0;
         }
 
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
+            padding: 15px;
             border-bottom: 1px solid #ccc;
         }
 
-        .identity {
-            font-weight: bold;
+        .layout {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 20%;
+            border-right: 1px solid #ccc;
+            padding: 15px;
+        }
+
+        .threads {
+            width: 35%;
+            border-right: 1px solid #ccc;
+            padding: 15px;
+        }
+
+        .conversation {
+            width: 45%;
+            padding: 15px;
         }
 
         ul {
@@ -43,153 +45,267 @@
         }
 
         li {
-            padding: 10px;
+            padding: 12px;
             border-bottom: 1px solid #eee;
         }
 
-        .channel {
-            color: #666;
+        small {
+            color: #777;
         }
 
-        small {
+        .empty {
             color: #888;
+            font-style: italic;
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-<!-- TOP BAR -->
-<div class="top-bar">
-    <h2>Greyliens Forum</h2>
 
-    <div class="identity">
-        {% if identity == "logged_out" %}
-            Not logged in
-        {% elif identity == "guest" %}
-            Guest
-        {% elif identity == "db_user" %}
-            {{ user }}
-        {% endif %}
+<div class="top-bar">
+
+    <h2>
+        Greyliens Forum
+    </h2>
+
+    <div>
+        Read Only Mode
     </div>
+
 </div>
 
-<!-- MAIN LAYOUT -->
+
+
+
 <div class="layout">
 
-    <!-- SIDEBAR (CHANNELS) -->
+
+
+    <!-- CHANNEL SIDEBAR -->
+
     <div class="sidebar">
-        <h3>Channels</h3>
 
-        <ul>
-            {% if channels %}
-                {% for c in channels %}
-                    <li>#{{ c[1] }}</li>
-                {% endfor %}
-            {% else %}
-                <li>No channels</li>
-            {% endif %}
-        </ul>
-    </div>
+        <h3>
+            Channels
+        </h3>
 
-    <!-- MAIN CONTENT -->
-    <div class="main">
 
-        <!-- LOGIN / LOGOUT -->
-        {% if identity == "logged_out" %}
+        {% if channels %}
 
-            <h3>Login</h3>
-
-    <form method="POST" action="/login">
-        <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            required
-        >
-        <button type="submit">Login</button>
-    </form>
-
-            <br>
-
-            <a href="/guest-login">
-                <button type="button">Continue as Guest</button>
-            </a>
-
-        {% else %}
-
-    <p>
-        Logged in as:
-        <b>
-            {% if identity == "guest" %}
-                Guest
-            {% else %}
-                {{ user }}
-            {% endif %}
-        </b>
-    </p>
-
-            <a href="/logout">
-                <button type="button">Logout</button>
-            </a>
-
-        {% endif %}
-
-        <hr>
-
-        <!-- MESSAGE FORM -->
-        {% if identity != "logged_out" %}
-
-            <h3>Post a Message</h3>
-
-    <form method="POST" action="/send">
-        <input
-            type="text"
-            name="content"
-            placeholder="Type message"
-            required
-        >
-        <button type="submit">Send</button>
-    </form>
-
-        {% else %}
-
-            <p>You must log in before posting messages.</p>
-
-        {% endif %}
-
-        <hr>
-
-        <!-- MESSAGES -->
-        <h2>Messages</h2>
-
-        {% if messages %}
 
             <ul>
-                {% for msg in messages %}
+
+                {% for channel in channels %}
+
                     <li>
-                        <strong>{{ msg[2] }}</strong>
-                        in <strong class="channel">#{{ msg[3] }}</strong>
-                        <br><br>
 
-                        {{ msg[1] }}
+                        #{{ channel[1] }}
 
-                        <br><br>
-
-                        <small>{{ msg[4] }}</small>
                     </li>
+
                 {% endfor %}
+
+
             </ul>
+
 
         {% else %}
 
-            <p>No messages yet.</p>
+
+            <p class="empty">
+                Select a thread to view the conversation.
+            </p>
+
 
         {% endif %}
 
+
+
     </div>
 
+
+
+
+
+
+    <!-- THREAD LIST -->
+
+
+    <div class="threads">
+
+
+        <h3>
+            Threads
+        </h3>
+
+
+
+        {% if threads %}
+
+
+            <ul>
+
+
+                {% for thread in threads %}
+
+
+                    <li data-thread-id="{{ thread[0] }}">
+
+
+                        <strong>
+                            {{ thread[1] }}
+                        </strong>
+
+
+                        <br>
+
+
+                        {{ thread[2] }}
+
+
+                        <br>
+
+
+                        <small>
+
+                            By {{ thread[3] }}
+
+                            -
+
+                            {{ thread[4] }}
+
+                        </small>
+
+
+                    </li>
+
+
+                {% endfor %}
+
+
+            </ul>
+
+
+
+        {% else %}
+
+
+
+            <p class="empty">
+                No threads available.
+            </p>
+
+
+
+        {% endif %}
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <!-- REPLIES / CONVERSATION -->
+
+
+    <div class="conversation">
+
+
+        <h3>
+            Conversation
+        </h3>
+
+
+
+        {% if replies %}
+
+
+
+            <ul>
+
+
+
+                {% for reply in replies %}
+
+
+
+                    <li>
+
+
+
+                        <strong>
+
+                            {{ reply[2] }}
+
+                        </strong>
+
+
+
+                        <br><br>
+
+
+
+                        {{ reply[1] }}
+
+
+
+                        <br><br>
+
+
+
+                        <small>
+
+                            {{ reply[3] }}
+
+                        </small>
+
+
+
+                    </li>
+
+
+
+                {% endfor %}
+
+
+
+            </ul>
+
+
+
+
+        {% else %}
+
+
+
+            <p class="empty">
+
+                No replies available.
+
+            </p>
+
+
+
+        {% endif %}
+
+
+
+    </div>
+
+
+
+
 </div>
+
+
 
 </body>
 </html>

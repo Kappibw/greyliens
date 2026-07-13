@@ -97,19 +97,26 @@
 
 <!-- THREAD FORM -->
 {% if identity != "logged_out" %}
+
 <h3>Create Thread</h3>
 
-    <form method="POST" action="/send">
-        <input
-            type="text"
-            name="content"
-            placeholder="Type message"
-            required
-        >
-        <button type="submit">Send</button>
-    </form>
+<form method="POST" action="/threads">
+
+    <input
+        type="text"
+        name="title"
+        placeholder="Thread title"
+        required
+    >
+
+    <button type="submit">
+        Create Thread
+    </button>
+
+</form>
 
 <hr>
+
 {% endif %}
 
 <!-- THREADS -->

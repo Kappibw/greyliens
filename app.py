@@ -1,8 +1,10 @@
 import os
 from flask import Flask, render_template, request, redirect, session
-
+from dotenv import load_dotenv
 from db import get_conn
 from auth import get_identity
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -12,7 +14,7 @@ app = Flask(__name__)
 # Used by Flask to securely sign session cookies.
 # The value should be provided through environment variables.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-#Check if the secret key environment variable is set
+# Check if the secret key environment variable is set
 if not app.config["SECRET_KEY"]:
     raise ValueError("Environment variable 'SECRET_KEY' is not set")
 else:
@@ -70,22 +72,27 @@ def index():
 # -----------------------
 @app.route("/threads", methods=["POST"])
 def create_thread():
-    if "user_id" not in session:
+    identity = get_identity()
+
+    # Guests and registered users can create threads
+    if identity == "logged_out":
         return "Not allowed (logged out)", 403
 
-    title = request.form.get("title")
-    content = request.form.get("content")
+    title = request.form.get("title", "").strip()
 
-    if not title or not content:
-        return "Title and content required", 400
+    if not title:
+        return "Thread title required", 400
 
     conn = get_conn()
     cur = conn.cursor()
 
     cur.execute("""
-        INSERT INTO threads (title, content, user_id)
-        VALUES (%s, %s, %s)
-    """, (title, content, session["user_id"]))
+        INSERT INTO threads (title, user_id)
+        VALUES (%s, %s)
+    """, (
+        title,
+        session["user_id"]
+    ))
 
     conn.commit()
 

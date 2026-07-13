@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
     <title>Greyliens Forum</title>
 
     <style>
@@ -18,8 +17,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
+            font-weight: bold;
         }
 
         .identity {
@@ -40,30 +38,19 @@
         small {
             color: #888;
         }
-
     </style>
-
 </head>
-
 
 <body>
 
-
 <div class="top-bar">
-
     <h2>Greyliens Forum</h2>
 
-
     <!-- Top-right identity display -->
-
     <div class="identity">
-
         {% if identity == "logged_out" %}
-
             Not logged in
-
         {% else %}
-
             Logged in as:
             <b>
                 {% if identity == "guest" %}
@@ -72,90 +59,56 @@
                     {{ user }}
                 {% endif %}
             </b>
-
         {% endif %}
-
     </div>
-
-
 </div>
-
-
 
 <div class="container">
 
-
-
-<!-- LOGIN SECTION -->
-
+<!-- LOGIN / LOGOUT SECTION -->
 {% if identity == "logged_out" %}
 
+    <!-- LOGIN SECTION -->
     <h3>Login</h3>
 
-
     <form method="POST" action="/login">
-
         <input
             type="text"
             name="username"
             placeholder="Username"
             required
         >
-
         <button type="submit">
             Login
         </button>
-
     </form>
-
-
 
     <br>
 
-
     <a href="/guest-login">
-
         <button type="button">
             Continue as Guest
         </button>
-
     </a>
-
-
 
 {% else %}
 
-
     <a href="/logout">
-
         <button type="button">
             Logout
         </button>
-
     </a>
-
 
 {% endif %}
 
-
-
-
 <hr>
 
-
-
 <!-- THREAD FORM -->
-
-
 {% if identity != "logged_out" %}
-
 
     <h3>Create Thread</h3>
 
-
     <form method="POST" action="/threads">
-
-
         <input
             type="text"
             name="title"
@@ -163,105 +116,50 @@
             required
         >
 
-
         <button type="submit">
-
             Create Thread
-
         </button>
-
-
     </form>
-
 
 {% else %}
 
-
-    <p>
-        You must log in before creating threads.
-    </p>
-
+    <p>You must log in before creating threads.</p>
 
 {% endif %}
 
-
-
 <hr>
 
-
-
-
 <!-- THREADS -->
-
-
 <h2>Threads</h2>
-
 
 {% if threads %}
 
-
     {% for t in threads %}
-
-
         <div class="thread-box">
+            <h3>{{ t[1] }}</h3>
 
-
-            <h3>
-                {{ t[1] }}
-            </h3>
-
-
-            <p>
-                {{ t[2] }}
-            </p>
-
+            <p>{{ t[2] }}</p>
 
             <small>
-
                 By {{ t[3] }} • {{ t[4] }}
-
             </small>
-
-
         </div>
-
-
     {% endfor %}
-
-
 
 {% else %}
 
-
-    <p>
-        No threads yet.
-    </p>
-
-
+    <p>No threads yet.</p>
 
 {% endif %}
 
-
-
-
 <hr>
 
-
-
-
-
 <!-- MESSAGE FORM -->
-
-
 {% if identity != "logged_out" %}
-
 
     <h3>Post a Message</h3>
 
-
     <form method="POST" action="/send">
-
-
         <input
             type="text"
             name="content"
@@ -269,120 +167,50 @@
             required
         >
 
-
         <button type="submit">
-
             Send
-
         </button>
-
-
     </form>
-
-
 
 {% else %}
 
-
-    <p>
-        You must log in before posting messages.
-    </p>
-
-
+    <p>You must log in before posting messages.</p>
 
 {% endif %}
-
-
-
 
 <hr>
 
-
-
-
-
 <!-- MESSAGES -->
-
-
 <h2>Messages</h2>
-
-
 
 {% if messages %}
 
-
-
     <ul>
-
-
         {% for msg in messages %}
-
-
             <li style="margin-bottom: 10px;">
-
-
-                <strong>
-                    {{ msg[2] }}
-                </strong>
-
-
+                <strong>{{ msg[2] }}</strong>
                 in
-
-
-                <strong>
-                    #{{ msg[3] }}
-                </strong>
-
+                <strong>#{{ msg[3] }}</strong>
 
                 <br>
-
 
                 {{ msg[1] }}
 
-
                 <br>
 
-
-                <small>
-
-                    {{ msg[4] }}
-
-                </small>
-
-
-
+                <small>{{ msg[4].strftime('%Y-%m-%d %H:%M') }}</small>
             </li>
-
-
-
         {% endfor %}
-
-
-
     </ul>
-
-
-
 
 {% else %}
 
-
-
-    <p>
-        No messages yet.
-    </p>
-
-
-
+    <p>No messages yet.</p>
 
 {% endif %}
 
-
-
 </div>
 
-
-
 </body>
-
 </html>
+

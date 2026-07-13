@@ -94,6 +94,33 @@ See `schema.md` for the database schema.
 * Application assumes a preconfigured Railway PostgreSQL database
 
 ---
+## Switching from Railway PostgreSQL to Local PostgreSQL
+
+The project was initially developed using a PostgreSQL database hosted on Railway. For local development and testing, the application was moved to a locally hosted PostgreSQL database.
+
+The migration process involved:
+
+* Creating a local PostgreSQL database (`chatforum`).
+* Updating the `DATABASE_URL` in the `.env` file to use the local database connection.
+* Creating the required database tables locally.
+* Testing the application to confirm that Flask was connecting to the local database successfully.
+
+Local database configuration:
+
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/chatforum
+```
+
+The application can now be run locally without depending on the Railway database.
+
+## Database Issue Encountered
+
+During development, the application was connecting to the wrong PostgreSQL database because an old `DATABASE_URL` was still being loaded.
+
+This caused errors when the application tried to access tables that existed in the correct database but not in the connected one.
+
+The issue was fixed by updating `db.py` to load the `.env` file from the project directory and use the correct `DATABASE_URL`. A check was also added to confirm that the database configuration exists before creating a connection.
+
 
 ## Status
 

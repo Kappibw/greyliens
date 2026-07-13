@@ -164,7 +164,7 @@ if not DATABASE_URL:
 
 
 def get_conn():
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg2.connect(DATABASE_URL.strip())
 ```
 
 ### Result

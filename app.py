@@ -28,14 +28,14 @@ print("TEMPLATE FOLDER:", app.template_folder)
 
 
 # -----------------------
-# HOME PAGE
+# HOME MESSAGES
 # -----------------------
 
 @app.route("/")
 def index():
     """
     Displays the forum homepage.
-    Retrieves messages with their authors and channels.
+    Retrieves messages with their authors and channels then render the forum page.
     """
 
     print("SESSION:", dict(session))
@@ -96,7 +96,7 @@ def send():
     content = request.form.get("content", "").strip()
 
     if not content:
-        return "Message cannot be empty", 400
+        return "Empty message not allowed", 400
 
     conn = get_conn()
     cur = conn.cursor()
@@ -129,7 +129,35 @@ def send():
 
     return redirect("/")
 
+# -----------------------
+# GUEST LOGIN
+# -----------------------
 
+@app.route("/guest-login")
+def guest_login():
+    """
+    Logs a user into the application using the guest account.
+    """
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT id FROM users WHERE username = 'guest' LIMIT 1;"
+    )
+
+    user = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    if not user:
+        return "Guest user not found", 500
+
+    session["user_id"] = user[0]
+    session["username"] = "guest"
+
+    return redirect("/")
 # -----------------------
 # LOGIN
 # -----------------------
@@ -137,9 +165,9 @@ def send():
 @app.route("/login", methods=["POST"])
 def login():
     """
-    Logs in a user using username lookup.
+    Authenticates a user by username.
+    If the username exists, the user's information is stored in session
     """
-
     username = request.form.get("username", "").strip()
 
     if not username:
@@ -175,7 +203,7 @@ def login():
 @app.route("/logout")
 def logout():
     """
-    Clears the current session.
+    Logs out the current user and clears session data.
     """
 
     session.clear()

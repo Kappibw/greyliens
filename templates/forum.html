@@ -57,255 +57,93 @@
             color: #888;
             font-style: italic;
         }
-
     </style>
-
 </head>
-
 
 <body>
 
-
 <div class="top-bar">
-
-    <h2>
-        Greyliens Forum
-    </h2>
+    <h2>Greyliens Forum</h2>
 
     <div>
-        Read Only Mode
+        {% if identity == "logged_out" %}
+            Not logged in
+        {% elif identity == "guest" %}
+            Logged in as <b>Guest</b>
+        {% else %}
+            Logged in as <b>{{ user }}</b>
+        {% endif %}
     </div>
-
 </div>
-
-
-
 
 <div class="layout">
 
-
-
     <!-- CHANNEL SIDEBAR -->
-
     <div class="sidebar">
 
-        <h3>
-            Channels
-        </h3>
-
+        <h3>Channels</h3>
 
         {% if channels %}
-
-
             <ul>
-
                 {% for channel in channels %}
-
-                    <li>
-
-                        #{{ channel[1] }}
-
-                    </li>
-
+                    <li>#{{ channel[1] }}</li>
                 {% endfor %}
-
-
             </ul>
-
-
         {% else %}
-
-
-            <p class="empty">
-                Select a thread to view the conversation.
-            </p>
-
-
+            <p class="empty">No channels available.</p>
         {% endif %}
 
-
-
     </div>
-
-
-
-
-
 
     <!-- THREAD LIST -->
-
-
     <div class="threads">
 
-
-        <h3>
-            Threads
-        </h3>
-
-
+        <h3>Threads</h3>
 
         {% if threads %}
-
-
             <ul>
-
-
                 {% for thread in threads %}
-
-
                     <li data-thread-id="{{ thread[0] }}">
-
-
-                        <strong>
-                            {{ thread[1] }}
-                        </strong>
-
-
+                        <strong>{{ thread[1] }}</strong>
                         <br>
-
-
                         {{ thread[2] }}
-
-
                         <br>
-
-
                         <small>
-
-                            By {{ thread[3] }}
-
-                            -
-
-                            {{ thread[4] }}
-
+                            By {{ thread[3] }} • {{ thread[4].strftime('%Y-%m-%d %H:%M') }}
                         </small>
-
-
                     </li>
-
-
                 {% endfor %}
-
-
             </ul>
-
-
-
         {% else %}
-
-
-
-            <p class="empty">
-                No threads available.
-            </p>
-
-
-
+            <p class="empty">No threads available.</p>
         {% endif %}
 
-
-
     </div>
-
-
-
-
-
-
 
     <!-- REPLIES / CONVERSATION -->
-
-
     <div class="conversation">
 
-
-        <h3>
-            Conversation
-        </h3>
-
-
+        <h3>Conversation</h3>
 
         {% if replies %}
-
-
-
             <ul>
-
-
-
                 {% for reply in replies %}
-
-
-
                     <li>
-
-
-
-                        <strong>
-
-                            {{ reply[2] }}
-
-                        </strong>
-
-
-
-                        <br><br>
-
-
-
+                        <strong>{{ reply[2] }}</strong>
+                        <br>
                         {{ reply[1] }}
-
-
-
-                        <br><br>
-
-
-
-                        <small>
-
-                            {{ reply[3] }}
-
-                        </small>
-
-
-
+                        <br>
+                        <small>{{ reply[3].strftime('%Y-%m-%d %H:%M') }}</small>
                     </li>
-
-
-
                 {% endfor %}
-
-
-
             </ul>
-
-
-
-
         {% else %}
-
-
-
-            <p class="empty">
-
-                No replies available.
-
-            </p>
-
-
-
+            <p class="empty">No replies to display.</p>
         {% endif %}
-
-
 
     </div>
 
-
-
-
 </div>
-
-
 
 </body>
 </html>

@@ -12,7 +12,7 @@ app = Flask(__name__)
 # Used by Flask to securely sign session cookies.
 # The value should be provided through environment variables.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-#Check if the secret key environment variable is set
+
 if not app.config["SECRET_KEY"]:
     raise ValueError("Environment variable 'SECRET_KEY' is not set")
 
@@ -20,15 +20,17 @@ print("SECRET_KEY is set")
 print("APP FILE:", os.path.abspath(__file__))
 print("TEMPLATE FOLDER:", app.template_folder)
 
+
 # -----------------------
-# HOME / MESSAGES
+# HOME PAGE
 # -----------------------
 @app.route("/")
 def index():
     """
-    Displays forum homepage with database content.
-    Retrieves all messages from the database along with
-    their authors and channels, then renders the forum page
+    Displays the forum homepage.
+
+    Retrieves all messages together with their authors and
+    channels before rendering the forum page.
     """
 
     print("SESSION:", dict(session))
@@ -45,31 +47,22 @@ def index():
     """)
     channels = cur.fetchall()
 
-    # Load threads
+    # Load messages
     cur.execute("""
-    SELECT
-        t.id,
-        t.title,
-        t.content,
-        u.username,
-        t.created_at
-    FROM threads t
-    JOIN users u ON t.user_id = u.id
-    ORDER BY t.id DESC;
-""")
-    threads = cur.fetchall() 
-    # Load replies
-    cur.execute("""
-    SELECT
-        r.id,
-        r.content,
-        u.username,
-        r.created_at
-    FROM replies r
-    JOIN users u ON r.user_id = u.id
-    ORDER BY r.id DESC;
-""")
-    replies = cur.fetchall()
+        SELECT
+            m.id,
+            m.content,
+            u.username,
+            c.name,
+            m.created_at
+        FROM messages m
+        JOIN users u
+            ON m.author_id = u.id
+        JOIN channels c
+            ON m.channel_id = c.id
+        ORDER BY m.id DESC;
+    """)
+    messages = cur.fetchall()
 
     cur.close()
     conn.close()
@@ -77,28 +70,27 @@ def index():
     return render_template(
         "forum.html",
         channels=channels,
-        threads=threads,
-        replies=replies,
+        messages=messages,
         user=session.get("username"),
         identity=get_identity()
     )
+
+
 # -----------------------
 # SEND MESSAGE
 # -----------------------
-
 @app.route("/send", methods=["POST"])
 def send():
     """
-     Creates a new message in the general channel.
+    Creates a new message in the general channel.
 
     Only authenticated users are allowed to submit messages.
-    Creates a new message.
     """
 
     if "user_id" not in session:
         return "Not allowed (logged out)", 403
 
-    content = request.form.get("content")
+    content = request.form.get("content", "").strip()
 
     if not content:
         return "Empty message not allowed", 400
@@ -137,6 +129,9 @@ def send():
     return redirect("/")
 
 
+# -----------------------
+# GUEST LOGIN
+# -----------------------
 @app.route("/guest-login")
 def guest_login():
     """
@@ -167,14 +162,18 @@ def guest_login():
     return redirect("/")
 
 
+# -----------------------
+# LOGIN
+# -----------------------
 @app.route("/login", methods=["POST"])
 def login():
     """
     Authenticates a user by username.
 
-    If the username exists, the user's information is stored in session.
+    If the username exists, the user's information is stored in the session.
     """
-    username = request.form.get("username")
+
+    username = request.form.get("username", "").strip()
 
     if not username:
         return "Username required", 400
@@ -202,6 +201,9 @@ def login():
     return redirect("/")
 
 
+# -----------------------
+# LOGOUT
+# -----------------------
 @app.route("/logout")
 def logout():
     """
@@ -213,5 +215,8 @@ def logout():
     return redirect("/")
 
 
+# -----------------------
+# RUN APP
+# -----------------------
 if __name__ == "__main__":
     app.run(debug=True)

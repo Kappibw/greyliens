@@ -98,26 +98,23 @@
     <!-- THREAD LIST -->
     <div class="threads">
 
-        <h3>Threads</h3>
+        <h3>Messages</h3>
 
-        {% if threads %}
+        {% if messages %}
             <ul>
-                {% for thread in threads %}
-                    <li data-thread-id="{{ thread[0] }}">
-                        <strong>{{ thread[1] }}</strong>
+                {% for message in messages %}
+                    <li>
+                        <strong>{{ message[2] }}</strong>
                         <br>
-                        {{ thread[2] }}
+                        {{ message[1] }}
                         <br>
-                        <small>
-                            By {{ thread[3] }} • {{ thread[4].strftime('%Y-%m-%d %H:%M') }}
-                        </small>
+                        <small>{{ message[3].strftime('%Y-%m-%d %H:%M') }}</small>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p class="empty">No threads available.</p>
+            <p class="empty">No messages to display.</p>
         {% endif %}
-
     </div>
 
     <!-- REPLIES / CONVERSATION -->

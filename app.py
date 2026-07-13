@@ -57,7 +57,7 @@ def index():
             m.created_at
         FROM messages m
         JOIN users u
-            ON m.author_id = u.id
+            ON m.USER_id = u.id
         JOIN channels c
             ON m.channel_id = c.id
         ORDER BY m.id DESC;
@@ -117,7 +117,7 @@ def send():
     channel_id = channel[0]
 
     cur.execute("""
-        INSERT INTO messages (channel_id, author_id, content)
+        INSERT INTO messages (channel_id, user_id, content)
         VALUES (%s, %s, %s)
     """, (channel_id, user_id, content))
 

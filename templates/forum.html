@@ -94,30 +94,8 @@
         {% endif %}
 
     </div>
-
-    <!-- THREAD LIST -->
-    <div class="threads">
-
-        <h3>Messages</h3>
-
-        {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li>
-                        <strong>{{ message[2] }}</strong>
-                        <br>
-                        {{ message[1] }}
-                        <br>
-                        <small>{{ message[3].strftime('%Y-%m-%d %H:%M') }}</small>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="empty">No messages to display.</p>
-        {% endif %}
-    </div>
-
-    <!-- REPLIES / CONVERSATION -->
+    
+     <!-- REPLIES / CONVERSATION -->
     <div class="conversation">
 
         <h3>Conversation</h3>

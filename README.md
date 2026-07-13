@@ -113,14 +113,63 @@ DATABASE_URL=postgresql://postgres:password@localhost:5432/chatforum
 
 The application can now be run locally without depending on the Railway database.
 
-## Database Issue Encountered
+## Database Issues Encountered
 
-During development, the application was connecting to the wrong PostgreSQL database because an old `DATABASE_URL` was still being loaded.
+During development, the application was initially connecting to the wrong PostgreSQL database because an old `DATABASE_URL` was still being loaded. This caused errors because the required tables were not available in the connected database.
 
-This caused errors when the application tried to access tables that existed in the correct database but not in the connected one.
+### Steps Taken
 
-The issue was fixed by updating `db.py` to load the `.env` file from the project directory and use the correct `DATABASE_URL`. A check was also added to confirm that the database configuration exists before creating a connection.
+1. Checked the error message and identified that the `channels` table could not be found.
+2. Verified the database connection using pgAdmin.
+3. Created the required tables in the local `chatforum` database:
 
+   * `users`
+   * `channels`
+   * `messages`
+4. Updated the environment configuration to point to the local PostgreSQL database.
+5. Updated `db.py` to ensure the correct `.env` file was loaded.
+
+### Previous `db.py` Configuration
+
+The application was loading environment variables using:
+
+```python
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+```
+
+This caused the application to load an outdated database URL.
+
+### Updated `db.py` Configuration
+
+The configuration was changed to explicitly load the `.env` file from the project directory:
+
+```python
+import os
+import psycopg2
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+load_dotenv(ENV_PATH)
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is missing from .env")
+
+
+def get_conn():
+    return psycopg2.connect(DATABASE_URL)
+```
+
+### Result
+
+After updating the database configuration, Flask successfully connected to the local PostgreSQL database and was able to access the required tables.
 
 ## Status
 

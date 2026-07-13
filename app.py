@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, redirect, session
 from dotenv import load_dotenv
 import os
@@ -13,12 +12,17 @@ app = Flask(__name__)
 # -----------------------
 # SECURITY CONFIG
 # -----------------------
+
+# Used by Flask to securely sign session cookies.
+# The value should be provided through environment variables.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
+# Check if the secret key environment variable is set
 if not app.config["SECRET_KEY"]:
     raise ValueError("Environment variable 'SECRET_KEY' is not set")
+else:
+    print("SECRET_KEY is set")
 
-print("SECRET_KEY is set")
 print("APP FILE:", os.path.abspath(__file__))
 print("TEMPLATE FOLDER:", app.template_folder)
 
@@ -26,14 +30,23 @@ print("TEMPLATE FOLDER:", app.template_folder)
 # -----------------------
 # HOME PAGE
 # -----------------------
+
 @app.route("/")
 def index():
+    """
+    Displays the forum homepage.
+    Retrieves messages with their authors and channels.
+    """
+
+    print("SESSION:", dict(session))
+    print("IDENTITY:", get_identity())
+
     conn = get_conn()
     cur = conn.cursor()
 
     # Channels
     cur.execute("""
-        SELECT id, name 
+        SELECT id, name
         FROM channels
         ORDER BY id;
     """)
@@ -69,8 +82,14 @@ def index():
 # -----------------------
 # SEND MESSAGE
 # -----------------------
+
 @app.route("/send", methods=["POST"])
 def send():
+    """
+    Creates a new message in the general channel.
+    Only logged-in users can send messages.
+    """
+
     if "user_id" not in session:
         return "Not allowed (logged out)", 403
 
@@ -83,8 +102,8 @@ def send():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id 
-        FROM channels 
+        SELECT id
+        FROM channels
         LIMIT 1;
     """)
 
@@ -94,7 +113,7 @@ def send():
         return "No channel found", 500
 
     cur.execute("""
-        INSERT INTO messages 
+        INSERT INTO messages
         (user_id, channel_id, content)
         VALUES (%s, %s, %s);
     """, (
@@ -114,8 +133,12 @@ def send():
 # -----------------------
 # LOGIN
 # -----------------------
+
 @app.route("/login", methods=["POST"])
 def login():
+    """
+    Logs in a user using username lookup.
+    """
 
     username = request.form.get("username", "").strip()
 
@@ -148,15 +171,21 @@ def login():
 # -----------------------
 # LOGOUT
 # -----------------------
+
 @app.route("/logout")
 def logout():
+    """
+    Clears the current session.
+    """
+
     session.clear()
     return redirect("/")
 
 
 # -----------------------
-# RUN
+# RUN APP
 # -----------------------
+
 if __name__ == "__main__":
     app.run(debug=True)
 

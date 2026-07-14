@@ -29,8 +29,11 @@ def index():
     """
     Displays the forum homepage.
 
-    Retrieves all messages together with their authors and
-    channels before rendering the forum page.
+    Retrieves channels and replies (messages) together with their
+    authors and channel metadata, then renders the forum page.
+
+    This view is intentionally read-only for the current PR: it only
+    loads database content for display and does not perform any writes.
     """
 
     print("SESSION:", dict(session))
@@ -47,22 +50,19 @@ def index():
     """)
     channels = cur.fetchall()
 
-    # Load messages
+    # Load replies (messages) to display in the conversation panel
     cur.execute("""
         SELECT
             m.id,
             m.content,
             u.username,
-            c.name,
             m.created_at
         FROM messages m
         JOIN users u
-            ON m.USER_id = u.id
-        JOIN channels c
-            ON m.channel_id = c.id
+            ON m.user_id = u.id
         ORDER BY m.id DESC;
     """)
-    messages = cur.fetchall()
+    replies = cur.fetchall()
 
     cur.close()
     conn.close()
@@ -70,7 +70,7 @@ def index():
     return render_template(
         "forum.html",
         channels=channels,
-        messages=messages,
+        replies=replies,
         user=session.get("username"),
         identity=get_identity()
     )

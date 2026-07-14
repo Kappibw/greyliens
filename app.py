@@ -109,12 +109,22 @@ def send():
 
     channel = cur.fetchone()
 
+    # If the 'general' channel does not exist, create it automatically.
     if not channel:
-        cur.close()
-        conn.close()
-        return "Channel not found", 500
-
-    channel_id = channel[0]
+        cur.execute("""
+            INSERT INTO channels (name)
+            VALUES (%s)
+            RETURNING id;
+        """, ("general",))
+        created = cur.fetchone()
+        if not created:
+            cur.close()
+            conn.close()
+            return "Failed to create channel", 500
+        channel_id = created[0]
+        conn.commit()
+    else:
+        channel_id = channel[0]
 
     cur.execute("""
         INSERT INTO messages (channel_id, user_id, content)
@@ -150,13 +160,27 @@ def guest_login():
 
     user = cur.fetchone()
 
+    # If the guest user doesn't exist, create it automatically.
+    if not user:
+        cur.execute("""
+            INSERT INTO users (username)
+            VALUES (%s)
+            RETURNING id;
+        """, ("guest",))
+        created = cur.fetchone()
+        if not created:
+            cur.close()
+            conn.close()
+            return "Failed to create guest user", 500
+        user_id = created[0]
+        conn.commit()
+    else:
+        user_id = user[0]
+
     cur.close()
     conn.close()
 
-    if not user:
-        return "Guest user not found", 500
-
-    session["user_id"] = user[0]
+    session["user_id"] = user_id
     session["username"] = "guest"
 
     return redirect("/")

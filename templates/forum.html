@@ -67,11 +67,17 @@
 
     <div>
         {% if identity == "logged_out" %}
-            Not logged in
+            <form action="/login" method="post" style="display:inline">
+                <input name="username" placeholder="username" required />
+                <button type="submit">Login</button>
+            </form>
+            <a href="/guest-login">Login as Guest</a>
         {% elif identity == "guest" %}
             Logged in as <b>Guest</b>
+            <a href="/logout" style="margin-left:10px">Logout</a>
         {% else %}
             Logged in as <b>{{ user }}</b>
+            <a href="/logout" style="margin-left:10px">Logout</a>
         {% endif %}
     </div>
 </div>
@@ -99,6 +105,18 @@
     <div class="conversation">
 
         <h3>Conversation</h3>
+
+        {% if identity != "logged_out" %}
+            <form action="/send" method="post">
+                <textarea name="content" rows="3" style="width:100%" placeholder="Write a message..."></textarea>
+                <div style="text-align:right; margin-top:6px">
+                    <button type="submit">Send</button>
+                </div>
+            </form>
+            <hr />
+        {% else %}
+            <p class="empty">Log in to post messages.</p>
+        {% endif %}
 
         {% if replies %}
             <ul>

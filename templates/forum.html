@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Greyliens Forum</title>
 
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
+            margin: 0;
         }
 
         .container {
@@ -17,200 +19,220 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-weight: bold;
+            padding: 15px;
+            border-bottom: 1px solid #ccc;
         }
 
         .identity {
             font-weight: bold;
         }
 
-        .thread-box {
+        .message-box {
             border: 1px solid #ddd;
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 6px;
         }
 
-        .channel {
-            color: gray;
-        }
-
         small {
             color: #888;
         }
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="top-bar">
+
     <h2>Greyliens Forum</h2>
 
-    <!-- Top-right identity display -->
+
     <div class="identity">
+
         {% if identity == "logged_out" %}
+
             Not logged in
+
+        {% elif identity == "guest" %}
+
+            Logged in as <b>Guest</b>
+
         {% else %}
-            Logged in as:
-            <b>
-                {% if identity == "guest" %}
-                    Guest
-                {% else %}
-                    {{ user }}
-                {% endif %}
-            </b>
+
+            Logged in as <b>{{ user }}</b>
+
         {% endif %}
+
     </div>
+
 </div>
+
+
 
 <div class="container">
 
-<!-- LOGIN / LOGOUT SECTION -->
+
+<!-- LOGIN SECTION -->
+
 {% if identity == "logged_out" %}
 
-    <!-- LOGIN SECTION -->
-    <h3>Login</h3>
+<h3>Login</h3>
 
-    <form method="POST" action="/login">
-        <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            required
-        >
-        <button type="submit">
-            Login
-        </button>
-    </form>
 
-    <br>
+<form method="POST" action="/login">
 
-    <a href="/guest-login">
-        <button type="button">
-            Continue as Guest
-        </button>
-    </a>
+    <input
+        type="text"
+        name="username"
+        placeholder="Username"
+        required
+    >
 
-{% else %}
+    <button type="submit">
+        Login
+    </button>
 
-    <a href="/logout">
-        <button type="button">
-            Logout
-        </button>
-    </a>
+</form>
 
-{% endif %}
 
-<hr>
+<br>
 
-<!-- THREAD FORM -->
-{% if identity != "logged_out" %}
 
-    <h3>Create Thread</h3>
+<a href="/guest-login">
 
-    <form method="POST" action="/threads">
-        <input
-            type="text"
-            name="title"
-            placeholder="Thread title"
-            required
-        >
+    <button type="button">
+        Continue as Guest
+    </button>
 
-        <button type="submit">
-            Create Thread
-        </button>
-    </form>
+</a>
+
 
 {% else %}
 
-    <p>You must log in before creating threads.</p>
+
+<a href="/logout">
+
+    <button type="button">
+        Logout
+    </button>
+
+</a>
+
 
 {% endif %}
 
-<hr>
 
-<!-- THREADS -->
-<h2>Threads</h2>
-
-{% if threads %}
-
-    {% for t in threads %}
-        <div class="thread-box">
-            <h3>{{ t[1] }}</h3>
-
-            <p>{{ t[2] }}</p>
-
-            <small>
-                By {{ t[3] }} • {{ t[4] }}
-            </small>
-        </div>
-    {% endfor %}
-
-{% else %}
-
-    <p>No threads yet.</p>
-
-{% endif %}
 
 <hr>
+
+
 
 <!-- MESSAGE FORM -->
+
+<h3>Post Message</h3>
+
+
 {% if identity != "logged_out" %}
 
-    <h3>Post a Message</h3>
 
-    <form method="POST" action="/send">
-        <input
-            type="text"
-            name="content"
-            placeholder="Type message"
-            required
-        >
+<form method="POST" action="/send">
 
-        <button type="submit">
-            Send
-        </button>
-    </form>
+    <input
+        type="text"
+        name="content"
+        placeholder="Type message"
+        required
+    >
+
+    <button type="submit">
+        Send
+    </button>
+
+</form>
+
 
 {% else %}
 
-    <p>You must log in before posting messages.</p>
+
+<p>
+    You must log in before posting messages.
+</p>
+
 
 {% endif %}
 
+
+
 <hr>
 
-<!-- MESSAGES -->
+
+
+<!-- MESSAGE LIST -->
+
+
 <h2>Messages</h2>
+
 
 {% if messages %}
 
-    <ul>
-        {% for msg in messages %}
-            <li style="margin-bottom: 10px;">
-                <strong>{{ msg[2] }}</strong>
-                in
-                <strong>#{{ msg[3] }}</strong>
 
-                <br>
+{% for msg in messages %}
 
-                {{ msg[1] }}
 
-                <br>
+<div class="message-box">
 
-                <small>{{ msg[4].strftime('%Y-%m-%d %H:%M') }}</small>
-            </li>
-        {% endfor %}
-    </ul>
 
-{% else %}
+<strong>
+    {{ msg[2] }}
+</strong>
 
-    <p>No messages yet.</p>
 
-{% endif %}
+<br>
+
+
+{{ msg[1] }}
+
+
+<br>
+
+
+<small>
+
+    Channel: #{{ msg[3] }}
+
+    <br>
+
+    {{ msg[4].strftime('%Y-%m-%d %H:%M') }}
+
+</small>
+
 
 </div>
 
+
+{% endfor %}
+
+
+
+{% else %}
+
+
+<p>
+    No messages available.
+</p>
+
+
+{% endif %}
+
+
+
+</div>
+
+
 </body>
+
 </html>
 

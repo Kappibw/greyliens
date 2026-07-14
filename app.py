@@ -5,66 +5,54 @@ import os
 from db import get_conn
 from auth import get_identity
 
+# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
+
 
 # -----------------------
 # SECURITY CONFIG
 # -----------------------
 
-# Used by Flask to securely sign session cookies.
-# The value should be provided through environment variables.
+# Flask uses SECRET_KEY to securely sign session cookies.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
-# Check if the secret key environment variable is set
 if not app.config["SECRET_KEY"]:
     raise ValueError("Environment variable 'SECRET_KEY' is not set")
-else:
-    print("SECRET_KEY is set")
-
-print("APP FILE:", os.path.abspath(__file__))
-print("TEMPLATE FOLDER:", app.template_folder)
 
 
 # -----------------------
-# HOME MESSAGES
+# HOME PAGE
 # -----------------------
 
 @app.route("/")
 def index():
     """
     Displays the forum homepage.
-    Retrieves messages with their authors and channels then render the forum page.
-    """
 
-    print("SESSION:", dict(session))
-    print("IDENTITY:", get_identity())
+    Retrieves messages from PostgreSQL and sends them
+    to the forum template.
+    """
 
     conn = get_conn()
     cur = conn.cursor()
 
-    # Channels
     cur.execute("""
-        SELECT id, name
-        FROM channels
-        ORDER BY id;
-    """)
-    channels = cur.fetchall()
-
-    # Messages
-    cur.execute("""
-        SELECT 
+        SELECT
             m.id,
             m.content,
             u.username,
             c.name,
             m.created_at
         FROM messages m
-        JOIN users u ON m.user_id = u.id
-        JOIN channels c ON m.channel_id = c.id
+        JOIN users u
+            ON m.user_id = u.id
+        JOIN channels c
+            ON m.channel_id = c.id
         ORDER BY m.id DESC;
     """)
+
     messages = cur.fetchall()
 
     cur.close()
@@ -72,7 +60,6 @@ def index():
 
     return render_template(
         "forum.html",
-        channels=channels,
         messages=messages,
         user=session.get("username"),
         identity=get_identity()
@@ -86,7 +73,8 @@ def index():
 @app.route("/send", methods=["POST"])
 def send():
     """
-    Creates a new message in the general channel.
+    Creates a new message.
+
     Only logged-in users can send messages.
     """
 
@@ -101,6 +89,7 @@ def send():
     conn = get_conn()
     cur = conn.cursor()
 
+    # Use the first available channel for MVP posting
     cur.execute("""
         SELECT id
         FROM channels
@@ -110,6 +99,8 @@ def send():
     channel = cur.fetchone()
 
     if not channel:
+        cur.close()
+        conn.close()
         return "No channel found", 500
 
     cur.execute("""
@@ -129,6 +120,7 @@ def send():
 
     return redirect("/")
 
+
 # -----------------------
 # GUEST LOGIN
 # -----------------------
@@ -136,15 +128,18 @@ def send():
 @app.route("/guest-login")
 def guest_login():
     """
-    Logs a user into the application using the guest account.
+    Logs in using the guest account.
     """
 
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute(
-        "SELECT id FROM users WHERE username = 'guest' LIMIT 1;"
-    )
+    cur.execute("""
+        SELECT id
+        FROM users
+        WHERE username = 'guest'
+        LIMIT 1;
+    """)
 
     user = cur.fetchone()
 
@@ -158,6 +153,8 @@ def guest_login():
     session["username"] = "guest"
 
     return redirect("/")
+
+
 # -----------------------
 # LOGIN
 # -----------------------
@@ -165,9 +162,9 @@ def guest_login():
 @app.route("/login", methods=["POST"])
 def login():
     """
-    Authenticates a user by username.
-    If the username exists, the user's information is stored in session
+    Logs in a user using username.
     """
+
     username = request.form.get("username", "").strip()
 
     if not username:
@@ -179,7 +176,7 @@ def login():
     cur.execute("""
         SELECT id, username
         FROM users
-        WHERE username=%s;
+        WHERE username = %s;
     """, (username,))
 
     user = cur.fetchone()
@@ -203,10 +200,11 @@ def login():
 @app.route("/logout")
 def logout():
     """
-    Logs out the current user and clears session data.
+    Clears the current user's session.
     """
 
     session.clear()
+
     return redirect("/")
 
 
@@ -216,4 +214,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
-

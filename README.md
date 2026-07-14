@@ -1,66 +1,131 @@
-# Chat Forum MVP – Flask + PostgreSQL (Railway)
+# Chat Forum MVP – Flask + PostgreSQL
 
 ## Overview
 
-A simple Flask chat forum built with Flask and PostgreSQL hosted on Railway. Users can log in, browse forum messages, and post messages stored in the database.
+Chat Forum MVP is a simple forum application built using Flask and PostgreSQL. The application allows users to log in, browse forum messages, and post messages stored in a PostgreSQL database.
+
+The application uses environment variables to configure the database connection, allowing it to run with either a local PostgreSQL database or a hosted PostgreSQL database such as Railway.
+
+---
 
 ## Features
 
 * Flask web application
-* PostgreSQL database hosted on Railway
+* PostgreSQL database integration
+* Support for local and hosted PostgreSQL databases
 * Username-based login (MVP)
 * Guest login
 * Session-based authentication
-* Dynamic forum messages
+* Dynamic forum message rendering
+
+---
 
 ## Project Structure
 
 ```text
 app.py
+auth.py
+db.py
 templates/
     forum.html
 schema.md
+requirements.txt
 README.md
-screenshots/
 ```
+
+---
 
 ## Installation
 
-1. Clone the repository.
+### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
 cd <repository-folder>
 ```
 
-2. Create and activate a virtual environment.
+### 2. Create and activate a virtual environment
+
+**Windows**
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-3. Install the required packages.
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
+---
+
 ## Environment Variables
 
-This application requires the following environment variables:
+Create a `.env` file in the project root directory.
+
+The application requires:
 
 ```env
 SECRET_KEY=your-secret-key
-DATABASE_URL=your-railway-postgresql-url
+DATABASE_URL=your-postgresql-connection-string
 ```
 
-The application reads these values using `os.getenv(...).strip()` before configuring Flask and connecting to the Railway PostgreSQL database.
+### SECRET_KEY
 
-* `SECRET_KEY` – Used by Flask to manage sessions.
-* `DATABASE_URL` – Connection string for the Railway PostgreSQL database.
+`SECRET_KEY` is used by Flask to securely manage user sessions.
 
-If deploying on Railway, add both variables in your Railway project's **Variables** tab.
+Example:
+
+```env
+SECRET_KEY=my-secret-key
+```
+
+---
+
+# Database Configuration
+
+The application connects to PostgreSQL using the `DATABASE_URL` environment variable.
+
+The same code works with both local and hosted databases. Only the value of `DATABASE_URL` needs to change.
+
+---
+
+## Option 1: Local PostgreSQL Database
+
+To run the application locally, create a PostgreSQL database and update your `.env` file.
+
+Example:
+
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/chatforum
+```
+
+Make sure the required tables exist:
+
+* users
+* channels
+* messages
+
+---
+
+## Option 2: Railway PostgreSQL Database
+
+To use Railway PostgreSQL:
+
+1. Create or open your Railway project.
+2. Add a PostgreSQL database service.
+3. Copy the provided PostgreSQL connection string.
+4. Add it to your `.env` file:
+
+```env
+DATABASE_URL=your-railway-postgresql-connection-string
+```
+
+No code changes are required when switching between local PostgreSQL and Railway PostgreSQL.
+
+---
 
 ## Running the Application
 
@@ -70,113 +135,37 @@ Start the Flask development server:
 python app.py
 ```
 
-Then open your browser and visit:
+Open your browser and visit:
 
 ```text
 http://127.0.0.1:5000
 ```
 
+---
+
 ## Database
 
-The application uses the following tables:
+The application uses the following database tables:
 
 * `users`
 * `channels`
 * `messages`
 
-See `schema.md` for the database schema.
+The database schema is documented in:
+
+```text
+schema.md
+```
+
+---
 
 ## Notes
 
-* No passwords are used (MVP design choice)
-* Session is the only source of truth for authentication
-* No credentials are hardcoded in the codebase
-* Application assumes a preconfigured Railway PostgreSQL database
-
----
-## Switching from Railway PostgreSQL to Local PostgreSQL
-
-The project was initially developed using a PostgreSQL database hosted on Railway. For local development and testing, the application was moved to a locally hosted PostgreSQL database.
-
-The migration process involved:
-
-* Creating a local PostgreSQL database (`chatforum`).
-* Updating the `DATABASE_URL` in the `.env` file to use the local database connection.
-* Creating the required database tables locally.
-* Testing the application to confirm that Flask was connecting to the local database successfully.
-
-Local database configuration:
-
-```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/chatforum
-```
-
-The application can now be run locally without depending on the Railway database.
-
-## Database Issues Encountered
-
-During development, the application was initially connecting to the wrong PostgreSQL database because an old `DATABASE_URL` was still being loaded. This caused errors because the required tables were not available in the connected database.
-
-### Steps Taken
-
-1. Checked the error message and identified that the `channels` table could not be found.
-2. Verified the database connection using pgAdmin.
-3. Created the required tables in the local `chatforum` database:
-
-   * `users`
-   * `channels`
-   * `messages`
-4. Updated the environment configuration to point to the local PostgreSQL database.
-5. Updated `db.py` to ensure the correct `.env` file was loaded.
-
-### Previous `db.py` Configuration
-
-The application was loading environment variables using:
-
-```python
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-```
-
-This caused the application to load an outdated database URL.
-
-### Updated `db.py` Configuration
-
-The configuration was changed to explicitly load the `.env` file from the project directory:
-
-```python
-import os
-import psycopg2
-from dotenv import load_dotenv
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ENV_PATH = os.path.join(BASE_DIR, ".env")
-
-load_dotenv(ENV_PATH)
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL is missing from .env")
+* Authentication is session-based.
+* Password authentication is not implemented because this is an MVP.
+* Database credentials should be stored in environment variables and should not be committed to the repository.
+* The `.env` file should remain private and be included in `.gitignore`.
 
 
-def get_conn():
-    return psycopg2.connect(DATABASE_URL.strip())
-```
 
-### Result
-
-After updating the database configuration, Flask successfully connected to the local PostgreSQL database and was able to access the required tables.
-
-## Status
-
-The application is fully functional with:
-
-* Railway PostgreSQL integration
-* Session-based identity system
-* Working login, guest login, and logout
-* Dynamic message rendering from database
 

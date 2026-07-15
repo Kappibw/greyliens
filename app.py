@@ -1,29 +1,28 @@
-import os
 from flask import Flask, render_template, request, redirect, session
+from dotenv import load_dotenv
+import os
 
 from db import get_conn
 from auth import get_identity
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 
 # -----------------------
 # SECURITY CONFIG
 # -----------------------
-# Used by Flask to securely sign session cookies.
-# The value should be provided through environment variables.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 if not app.config["SECRET_KEY"]:
     raise ValueError("Environment variable 'SECRET_KEY' is not set")
 
-print("SECRET_KEY is set")
-print("APP FILE:", os.path.abspath(__file__))
-print("TEMPLATE FOLDER:", app.template_folder)
-
 
 # -----------------------
 # HOME PAGE
 # -----------------------
+
 @app.route("/")
 def index():
     """
@@ -31,18 +30,11 @@ def index():
 
     Retrieves channels and replies (messages) together with their
     authors and channel metadata, then renders the forum page.
-
-    This view is intentionally read-only for the current PR: it only
-    loads database content for display and does not perform any writes.
     """
-
-    print("SESSION:", dict(session))
-    print("IDENTITY:", get_identity())
 
     conn = get_conn()
     cur = conn.cursor()
 
-    # Load channels
     cur.execute("""
         SELECT id, name
         FROM channels
@@ -50,7 +42,6 @@ def index():
     """)
     channels = cur.fetchall()
 
-    # Load replies (messages) to display in the conversation panel
     cur.execute("""
         SELECT
             m.id,
@@ -72,13 +63,14 @@ def index():
         channels=channels,
         replies=replies,
         user=session.get("username"),
-        identity=get_identity()
+        identity=get_identity(),
     )
 
 
 # -----------------------
 # SEND MESSAGE
 # -----------------------
+
 @app.route("/send", methods=["POST"])
 def send():
     """
@@ -106,10 +98,8 @@ def send():
         WHERE name = 'general'
         LIMIT 1;
     """)
-
     channel = cur.fetchone()
 
-    # If the 'general' channel does not exist, create it automatically.
     if not channel:
         cur.execute("""
             INSERT INTO channels (name)
@@ -132,7 +122,6 @@ def send():
     """, (channel_id, user_id, content))
 
     conn.commit()
-
     cur.close()
     conn.close()
 
@@ -142,6 +131,7 @@ def send():
 # -----------------------
 # GUEST LOGIN
 # -----------------------
+
 @app.route("/guest-login")
 def guest_login():
     """
@@ -160,7 +150,6 @@ def guest_login():
 
     user = cur.fetchone()
 
-    # If the guest user doesn't exist, create it automatically.
     if not user:
         cur.execute("""
             INSERT INTO users (username)
@@ -189,6 +178,7 @@ def guest_login():
 # -----------------------
 # LOGIN
 # -----------------------
+
 @app.route("/login", methods=["POST"])
 def login():
     """
@@ -228,6 +218,7 @@ def login():
 # -----------------------
 # LOGOUT
 # -----------------------
+
 @app.route("/logout")
 def logout():
     """
@@ -242,5 +233,6 @@ def logout():
 # -----------------------
 # RUN APP
 # -----------------------
+
 if __name__ == "__main__":
     app.run(debug=True)

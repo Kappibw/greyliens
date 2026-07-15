@@ -175,16 +175,16 @@
 <h2>Messages</h2>
 
 
-{% if replies %}
+{% if messages %}
 
     <ul>
-        {% for msg in replies %}
+        {% for msg in messages %}
             <li style="margin-bottom: 10px;">
                 <strong>{{ msg[2] }}</strong>
                 <br>
                 {{ msg[1] }}
                 <br>
-                <small>{{ msg[3].strftime('%Y-%m-%d %H:%M') }}</small>
+                <small>{{ msg[4].strftime('%Y-%m-%d %H:%M') }} · {{ msg[3] }}</small>
             </li>
         {% endfor %}
     </ul>

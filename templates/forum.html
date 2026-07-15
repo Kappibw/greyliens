@@ -64,10 +64,6 @@
 
             Logged in as <b>{{ user }}</b>
 
-        {% elif identity == "guest" %}
-            Guest
-        {% elif identity == "db_user" %}
-            {{ user }}
         {% endif %}
 
     </div>
@@ -84,8 +80,6 @@
 {% if identity == "logged_out" %}
 
 <h3>Login</h3>
-
-    <h3>Login</h3>
 
 <form method="POST" action="/login">
 
@@ -113,9 +107,6 @@
     </button>
 
 </a>
-    <a href="/guest-login">
-        <button type="button">Continue as Guest</button>
-    </a>
 
 
 {% else %}

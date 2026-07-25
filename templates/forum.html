@@ -4,137 +4,385 @@
     <title>Greyliens Forum</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
+        body{
+            margin:0;
+            font-family:Arial,sans-serif;
+            background:#f5f5f5;
         }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #ccc;
+        .top-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:15px 20px;
+            background:white;
+            border-bottom:1px solid #ddd;
         }
 
-        .layout {
-            display: flex;
-            height: calc(100vh - 70px);
+        .layout{
+            display:flex;
+            height:calc(100vh - 70px);
         }
 
-        .sidebar {
-            width: 20%;
-            border-right: 1px solid #ccc;
-            padding: 15px;
+        .sidebar{
+            width:20%;
+            background:white;
+            border-right:1px solid #ddd;
+            padding:20px;
+            overflow-y:auto;
         }
 
-        .threads {
-            width: 35%;
-            border-right: 1px solid #ccc;
-            padding: 15px;
+        .threads{
+            width:35%;
+            background:#fafafa;
+            border-right:1px solid #ddd;
+            padding:20px;
+            overflow-y:auto;
         }
 
-        .conversation {
-            width: 45%;
-            padding: 15px;
+        .conversation{
+            width:45%;
+            background:white;
+            padding:20px;
+            overflow-y:auto;
         }
 
-        ul {
-            list-style: none;
-            padding: 0;
+        h3{
+            margin-top:0;
         }
 
-        li {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
+        .card{
+            background:white;
+            border:1px solid #ddd;
+            border-radius:6px;
+            padding:12px;
+            margin-bottom:15px;
         }
 
-        small {
-            color: #777;
+        ul{
+            list-style:none;
+            padding:0;
+            margin:0;
         }
 
-        .empty {
-            color: #888;
-            font-style: italic;
+        li{
+            margin-bottom:12px;
         }
+
+        .empty{
+            color:#777;
+            font-style:italic;
+        }
+
+        small{
+            color:#666;
+        }
+
+        textarea{
+            resize:none;
+        }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="top-bar">
+
     <h2>Greyliens Forum</h2>
 
+
     <div>
+
         {% if identity == "logged_out" %}
+
+
             <form action="/login" method="post" style="display:inline">
-                <input name="username" placeholder="username" required />
-                <button type="submit">Login</button>
+
+                <input 
+                    name="username" 
+                    placeholder="username"
+                    required
+                >
+
+                <button type="submit">
+                    Login
+                </button>
+
             </form>
-            <a href="/guest-login">Login as Guest</a>
+
+
+            <a href="/guest-login" style="margin-left:10px">
+                Login as Guest
+            </a>
+
+
         {% elif identity == "guest" %}
-            Logged in as <b>Guest</b>
-            <a href="/logout" style="margin-left:10px">Logout</a>
+
+
+            Logged in as <strong>Guest</strong>
+
+
+            <a href="/logout" style="margin-left:10px">
+                Logout
+            </a>
+
+
         {% else %}
-            Logged in as <b>{{ user }}</b>
-            <a href="/logout" style="margin-left:10px">Logout</a>
+
+
+            Logged in as <strong>{{ user }}</strong>
+
+
+            <a href="/logout" style="margin-left:10px">
+                Logout
+            </a>
+
+
         {% endif %}
+
+
     </div>
+
+
 </div>
+
+
+
 
 <div class="layout">
 
-    <!-- CHANNEL SIDEBAR -->
+
+
+    <!-- CHANNELS -->
+
     <div class="sidebar">
+
 
         <h3>Channels</h3>
 
+
         {% if channels %}
+
+
             <ul>
-                {% for channel in channels %}
-                    <li>#{{ channel[1] }}</li>
-                {% endfor %}
+
+
+            {% for channel in channels %}
+
+
+                <li>
+                    # {{ channel[1] }}
+                </li>
+
+
+            {% endfor %}
+
+
             </ul>
+
+
         {% else %}
-            <p class="empty">No channels available.</p>
+
+
+            <p class="empty">
+                No channels found.
+            </p>
+
+
         {% endif %}
+
 
     </div>
 
-    <!-- REPLIES / CONVERSATION -->
+
+
+
+
+    <!-- THREADS -->
+
+
+    <div class="threads">
+
+
+        <h3>Threads</h3>
+
+
+        {% if threads %}
+
+
+            {% for thread in threads %}
+
+
+                <div class="card">
+
+
+                    <h4>
+                        {{ thread[1] }}
+                    </h4>
+
+
+                    <small>
+                        By {{ thread[2] if thread[2] else "Unknown User" }}
+                    </small>
+
+
+                    <br>
+
+
+                    <small>
+                        {{ thread[3].strftime('%Y-%m-%d %H:%M') if thread[3] }}
+                    </small>
+
+
+                </div>
+
+
+            {% endfor %}
+
+
+        {% else %}
+
+
+            <p class="empty">
+                No threads available.
+            </p>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+
+
+
+    <!-- MESSAGES / CONVERSATION -->
+
+
     <div class="conversation">
 
-        <h3>Conversation</h3>
+
+        <h3>
+            Conversation
+        </h3>
+
+
+
+        <!-- POST MESSAGE -->
+
 
         {% if identity != "logged_out" %}
+
+
             <form action="/send" method="post">
-                <textarea name="content" rows="3" style="width:100%" placeholder="Write a message..."></textarea>
+
+
+                <textarea
+                    name="content"
+                    rows="3"
+                    style="width:100%"
+                    placeholder="Write a message..."
+                ></textarea>
+
+
                 <div style="text-align:right; margin-top:6px">
-                    <button type="submit">Send</button>
+
+
+                    <button type="submit">
+                        Send
+                    </button>
+
+
                 </div>
+
             </form>
-            <hr />
+
+
+            <hr>
+
+
+
         {% else %}
-            <p class="empty">Log in to post messages.</p>
+
+
+            <p class="empty">
+                Login to post messages.
+            </p>
+
+
+
         {% endif %}
 
-        {% if replies %}
-            <ul>
-                {% for reply in replies %}
-                    <li>
-                        <strong>{{ reply[2] }}</strong>
-                        <br>
-                        {{ reply[1] }}
-                        <br>
-                        <small>{{ reply[3].strftime('%Y-%m-%d %H:%M') }}</small>
-                    </li>
-                {% endfor %}
-            </ul>
+
+
+
+
+        <!-- DISPLAY MESSAGES -->
+
+
+        {% if messages %}
+
+
+
+            {% for message in messages %}
+
+
+
+                <div class="card">
+
+
+
+                    <strong>
+                        {{ message[3] if message[3] else "Unknown User" }}
+                    </strong>
+
+
+
+                    <p>
+                        {{ message[2] }}
+                    </p>
+
+
+
+                    <small>
+                        {{ message[4].strftime('%Y-%m-%d %H:%M') if message[4] }}
+                    </small>
+
+
+
+                </div>
+
+
+
+            {% endfor %}
+
+
+
+
         {% else %}
-            <p class="empty">No replies to display.</p>
+
+
+
+            <p class="empty">
+                No messages available.
+            </p>
+
+
+
         {% endif %}
+
+
+
 
     </div>
+
+
+
 
 </div>
 

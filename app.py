@@ -5,14 +5,18 @@ import os
 from db import get_conn
 from auth import get_identity
 
+
 # Load environment variables
 load_dotenv()
 
+
 app = Flask(__name__)
+
 
 # -----------------------
 # SECURITY CONFIG
 # -----------------------
+
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 if not app.config["SECRET_KEY"]:
@@ -28,44 +32,94 @@ def index():
     """
     Displays the forum homepage.
 
-    Retrieves channels and replies (messages) together with their
-    authors and channel metadata, then renders the forum page.
+    Retrieves forum data from the database including channels,
+    threads, and messages with their associated users. The retrieved
+    data is passed to the forum template to render the sidebar,
+    thread list, and conversation view.
     """
 
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT id, name
-        FROM channels
-        ORDER BY id;
-    """)
-    channels = cur.fetchall()
+    # -----------------------
+    # Load Channels
+    # -----------------------
 
-    cur.execute("""
-        SELECT
-            m.id,
-            m.content,
-            u.username,
-            m.created_at
-        FROM messages m
-        JOIN users u
-            ON m.user_id = u.id
-        ORDER BY m.id DESC;
-    """)
-    replies = cur.fetchall()
+    try:
+        cur.execute("""
+            SELECT id, name
+            FROM channels
+            ORDER BY id;
+        """)
+
+        channels = cur.fetchall()
+
+    except Exception:
+        conn.rollback()
+        channels = []
+
+
+    # -----------------------
+    # Load Threads
+    # -----------------------
+
+    try:
+        cur.execute("""
+            SELECT
+                t.id,
+                t.title,
+                u.username,
+                t.created_at
+            FROM threads t
+            LEFT JOIN users u
+                ON t.author_id = u.id
+            ORDER BY t.created_at DESC;
+        """)
+
+        threads = cur.fetchall()
+
+    except Exception:
+        conn.rollback()
+        threads = []
+
+
+    # -----------------------
+    # Load Messages
+    # -----------------------
+
+    try:
+        cur.execute("""
+            SELECT
+                m.id,
+                m.thread_id,
+                m.content,
+                u.username,
+                m.created_at
+            FROM messages m
+            LEFT JOIN users u
+                ON m.user_id = u.id
+            ORDER BY m.created_at ASC;
+        """)
+
+        messages = cur.fetchall()
+
+    except Exception:
+        conn.rollback()
+        messages = []
+
 
     cur.close()
     conn.close()
 
+
     return render_template(
         "forum.html",
         channels=channels,
-        replies=replies,
+        threads=threads,
+        messages=messages,
         user=session.get("username"),
-        identity=get_identity(),
+        identity=get_identity()
     )
-
 
 # -----------------------
 # SEND MESSAGE
@@ -73,106 +127,79 @@ def index():
 
 @app.route("/send", methods=["POST"])
 def send():
-    """
-    Creates a new message in the general channel.
-
-    Only authenticated users are allowed to submit messages.
-    """
 
     if "user_id" not in session:
         return "Not allowed (logged out)", 403
 
+
     content = request.form.get("content", "").strip()
+
 
     if not content:
         return "Empty message not allowed", 400
 
+
     conn = get_conn()
     cur = conn.cursor()
 
-    user_id = session["user_id"]
 
-    cur.execute("""
-        SELECT id
-        FROM channels
-        WHERE name = 'general'
-        LIMIT 1;
-    """)
-    channel = cur.fetchone()
+    try:
 
-    if not channel:
+        # Find general channel
         cur.execute("""
-            INSERT INTO channels (name)
-            VALUES (%s)
-            RETURNING id;
-        """, ("general",))
-        created = cur.fetchone()
-        if not created:
-            cur.close()
-            conn.close()
-            return "Failed to create channel", 500
-        channel_id = created[0]
-        conn.commit()
-    else:
+            SELECT id
+            FROM channels
+            WHERE name = 'general'
+            LIMIT 1;
+        """)
+
+        channel = cur.fetchone()
+
+
+        if not channel:
+            return "General channel does not exist", 404
+
+
         channel_id = channel[0]
 
-    cur.execute("""
-        INSERT INTO messages (channel_id, user_id, content)
-        VALUES (%s, %s, %s)
-    """, (channel_id, user_id, content))
 
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    return redirect("/")
-
-
-# -----------------------
-# GUEST LOGIN
-# -----------------------
-
-@app.route("/guest-login")
-def guest_login():
-    """
-    Logs a user into the application using the guest account.
-    """
-
-    conn = get_conn()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT id
-        FROM users
-        WHERE username = 'guest'
-        LIMIT 1;
-    """)
-
-    user = cur.fetchone()
-
-    if not user:
+        # Insert message
         cur.execute("""
-            INSERT INTO users (username)
-            VALUES (%s)
-            RETURNING id;
-        """, ("guest",))
-        created = cur.fetchone()
-        if not created:
-            cur.close()
-            conn.close()
-            return "Failed to create guest user", 500
-        user_id = created[0]
+            INSERT INTO messages
+            (
+                channel_id,
+                user_id,
+                content
+            )
+            VALUES (%s, %s, %s);
+        """,
+        (
+            channel_id,
+            session["user_id"],
+            content
+        ))
+
+
         conn.commit()
-    else:
-        user_id = user[0]
 
-    cur.close()
-    conn.close()
 
-    session["user_id"] = user_id
-    session["username"] = "guest"
+    except Exception as e:
+
+        conn.rollback()
+
+        print("SEND ERROR:", e)
+
+        return "Failed to send message", 500
+
+
+    finally:
+
+        cur.close()
+        conn.close()
+
 
     return redirect("/")
+
 
 
 # -----------------------
@@ -181,38 +208,99 @@ def guest_login():
 
 @app.route("/login", methods=["POST"])
 def login():
-    """
-    Authenticates a user by username.
-
-    If the username exists, the user's information is stored in the session.
-    """
 
     username = request.form.get("username", "").strip()
+
 
     if not username:
         return "Username required", 400
 
+
     conn = get_conn()
     cur = conn.cursor()
+
 
     cur.execute("""
         SELECT id, username
         FROM users
         WHERE username = %s;
-    """, (username,))
+    """,
+    (username,))
+
 
     user = cur.fetchone()
+
 
     cur.close()
     conn.close()
 
+
     if not user:
         return "User not found", 404
+
 
     session["user_id"] = user[0]
     session["username"] = user[1]
 
+
     return redirect("/")
+
+
+
+# -----------------------
+# GUEST LOGIN
+# -----------------------
+
+@app.route("/guest-login")
+def guest_login():
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+
+    try:
+
+        cur.execute("""
+            SELECT id
+            FROM users
+            WHERE username = 'guest'
+            LIMIT 1;
+        """)
+
+        user = cur.fetchone()
+
+
+        if not user:
+
+            cur.execute("""
+                INSERT INTO users (username)
+                VALUES ('guest')
+                RETURNING id;
+            """)
+
+            user = cur.fetchone()
+
+            conn.commit()
+
+
+        session["user_id"] = user[0]
+        session["username"] = "guest"
+
+
+    except Exception:
+
+        conn.rollback()
+        return "Guest login failed", 500
+
+
+    finally:
+
+        cur.close()
+        conn.close()
+
+
+    return redirect("/")
+
 
 
 # -----------------------
@@ -221,13 +309,11 @@ def login():
 
 @app.route("/logout")
 def logout():
-    """
-    Logs out the current user and clears session data.
-    """
 
     session.clear()
 
     return redirect("/")
+
 
 
 # -----------------------

@@ -124,9 +124,13 @@ def index():
 # -----------------------
 # SEND MESSAGE
 # -----------------------
-
 @app.route("/send", methods=["POST"])
 def send():
+    """
+    Creates a new message from the logged-in user and posts it to the
+    hard-coded "general" channel. The user cannot choose which channel
+    to post to through this endpoint.
+    """
 
     if "user_id" not in session:
         return "Not allowed (logged out)", 403
@@ -208,6 +212,10 @@ def send():
 
 @app.route("/login", methods=["POST"])
 def login():
+    """
+    Logs in an existing user by username and stores the user's
+    identity in the session.
+    """
 
     username = request.form.get("username", "").strip()
 
@@ -309,7 +317,7 @@ def guest_login():
 
 @app.route("/logout")
 def logout():
-
+    """Clears the current user's session"""
     session.clear()
 
     return redirect("/")

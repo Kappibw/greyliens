@@ -1,3 +1,5 @@
+# Smoke test script that verifies the forum's guest login,
+# message sending, and homepage loading functionality.
 import sys
 try:
     import requests

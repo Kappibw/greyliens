@@ -1,18 +1,25 @@
+from flask import Flask, render_template, request, redirect, session
+from dotenv import load_dotenv
 import os
-from flask import Flask, render_template, request, redirect, session, jsonify
 
 from db import get_conn
 from auth import get_identity
 
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
 
-# =====================================================
-# CONFIG
-# =====================================================
-app.config["SECRET_KEY"] = os.getenv(
-    "SECRET_KEY",
-    "dev-secret-key-change-this"
-)
+
+# -----------------------
+# SECURITY CONFIG
+# -----------------------
+
+# Flask uses SECRET_KEY to securely sign session cookies.
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+
+if not app.config["SECRET_KEY"]:
+    raise ValueError("Environment variable 'SECRET_KEY' is not set")
 
 
 # =====================================================
@@ -28,28 +35,25 @@ def current_user():
 
 # =====================================================
 # HOME PAGE
-# =====================================================
+# -----------------------
+
 @app.route("/")
 def index():
+    """
+    Displays the forum homepage.
+
+    Retrieves messages from PostgreSQL and sends them
+    to the forum template.
+    """
+
     conn = get_conn()
     cur = conn.cursor()
 
+    # Channels
     cur.execute("SELECT id, name FROM channels")
     channels = cur.fetchall()
 
-    cur.execute("""
-        SELECT
-            t.id,
-            t.title,
-            t.content,
-            u.username,
-            t.created_at
-        FROM threads t
-        JOIN users u ON t.user_id = u.id
-        ORDER BY t.id DESC
-    """)
-    threads = cur.fetchall()
-
+    # Threads
     cur.execute("""
         SELECT
             m.id,
@@ -58,10 +62,13 @@ def index():
             c.name,
             m.created_at
         FROM messages m
-        JOIN users u ON m.author_id = u.id
-        JOIN channels c ON m.channel_id = c.id
-        ORDER BY m.id DESC
+        JOIN users u
+            ON m.user_id = u.id
+        JOIN channels c
+            ON m.channel_id = c.id
+        ORDER BY m.id DESC;
     """)
+
     messages = cur.fetchall()
 
     cur.close()
@@ -69,8 +76,6 @@ def index():
 
     return render_template(
         "forum.html",
-        channels=channels,
-        threads=threads,
         messages=messages,
         user=session.get("username"),
         user_id=current_user(),
@@ -212,13 +217,20 @@ def get_replies(thread_id):
 
 # =====================================================
 # SEND MESSAGE
-# =====================================================
+# -----------------------
+
 @app.route("/send", methods=["POST"])
 def send():
-    if not require_login():
-        return "Unauthorized", 403
+    """
+    Creates a new message.
 
-    content = request.form.get("content")
+    Only logged-in users can send messages.
+    """
+
+    if "user_id" not in session:
+        return "Not allowed (logged out)", 403
+
+    content = request.form.get("content", "").strip()
 
     if not content:
         return "Empty message not allowed", 400
@@ -226,9 +238,13 @@ def send():
     conn = get_conn()
     cur = conn.cursor()
 
+    # Use the first available channel for MVP posting
     cur.execute("""
-        SELECT id FROM channels WHERE name = 'general' LIMIT 1
+        SELECT id
+        FROM channels
+        LIMIT 1;
     """)
+
     channel = cur.fetchone()
 
     if not channel:
@@ -237,9 +253,14 @@ def send():
         return "Channel not found", 500
 
     cur.execute("""
-        INSERT INTO messages (channel_id, author_id, content)
-        VALUES (%s, %s, %s)
-    """, (channel[0], current_user(), content))
+        INSERT INTO messages
+        (user_id, channel_id, content)
+        VALUES (%s, %s, %s);
+    """, (
+        session["user_id"],
+        channel[0],
+        content
+    ))
 
     conn.commit()
     cur.close()
@@ -248,20 +269,26 @@ def send():
     return redirect("/")
 
 
-# =====================================================
-# GUEST LOGIN (SAFER)
-# =====================================================
+# -----------------------
+# GUEST LOGIN
+# -----------------------
+
 @app.route("/guest-login")
 def guest_login():
+    """
+    Logs in using the guest account.
+    """
+
     conn = get_conn()
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, username
+        SELECT id
         FROM users
         WHERE username = 'guest'
-        LIMIT 1
+        LIMIT 1;
     """)
+
     user = cur.fetchone()
 
     cur.close()
@@ -278,10 +305,15 @@ def guest_login():
 
 # =====================================================
 # LOGIN
-# =====================================================
+# -----------------------
+
 @app.route("/login", methods=["POST"])
 def login():
-    username = request.form.get("username")
+    """
+    Logs in a user using username.
+    """
+
+    username = request.form.get("username", "").strip()
 
     if not username:
         return "Username required", 400
@@ -289,12 +321,7 @@ def login():
     conn = get_conn()
     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT id, username
-        FROM users
-        WHERE username = %s
-    """, (username,))
-
+    cur.execute("SELECT id, username FROM users WHERE username = %s;", (username,))
     user = cur.fetchone()
 
     cur.close()
@@ -311,15 +338,22 @@ def login():
 
 # =====================================================
 # LOGOUT
-# =====================================================
+# -----------------------
+
 @app.route("/logout")
 def logout():
+    """
+    Clears the current user's session.
+    """
+
     session.clear()
+
     return redirect("/")
 
 
-# =====================================================
-# RUN SERVER
-# =====================================================
+# -----------------------
+# RUN APP
+# -----------------------
+
 if __name__ == "__main__":
     app.run(debug=True)

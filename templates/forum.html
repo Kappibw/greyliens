@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Greyliens Forum</title>
 
     <style>
         body {
-            font-family: Arial;
-            background: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
         }
 
         .container {
@@ -18,12 +19,17 @@
         .top-bar {
             display: flex;
             justify-content: space-between;
-            padding: 12px;
+            align-items: center;
+            padding: 15px;
             border-bottom: 1px solid #ccc;
             background: white;
         }
 
-        .thread-box {
+        .identity {
+            font-weight: bold;
+        }
+
+        .message-box {
             border: 1px solid #ddd;
             padding: 12px;
             margin-bottom: 10px;
@@ -42,10 +48,6 @@
 
         small {
             color: #888;
-        }
-
-        .channel {
-            color: gray;
         }
 
         h4 {
@@ -94,31 +96,37 @@
             font-style: italic;
         }
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="top-bar">
+
     <h2>Greyliens Forum</h2>
 
-    <div class="login-box">
+
+    <div class="identity">
 
         {% if identity == "logged_out" %}
 
-            <form action="/login" method="POST">
-                <input name="username" placeholder="Enter username" required>
-                <button type="submit">Login</button>
-            </form>
+            Not logged in
+
+        {% elif identity == "guest" %}
+
+            Logged in as <b>Guest</b>
 
         {% else %}
-
-            Logged in as: <strong>{{ user }}</strong>
-            <a href="/logout">Logout</a>
-
+            {{ user }}
         {% endif %}
 
     </div>
+
 </div>
+
+
 
 <div class="container">
 
@@ -210,5 +218,7 @@
 
 </div>
 
+
 </body>
+
 </html>

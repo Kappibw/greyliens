@@ -204,7 +204,133 @@ def send():
 
     return redirect("/")
 
+# -----------------------
+# VIEW THREAD
+# -----------------------
 
+@app.route("/thread/<int:thread_id>")
+def view_thread(thread_id):
+    """
+    Displays a single thread and its replies.
+    """
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+    try:
+
+        # Get thread details
+        cur.execute("""
+            SELECT
+                t.id,
+                t.title,
+                u.username,
+                t.created_at
+            FROM threads t
+            LEFT JOIN users u
+                ON t.author_id = u.id
+            WHERE t.id = %s;
+        """, (thread_id,))
+
+        thread = cur.fetchone()
+
+
+        # Get replies
+        cur.execute("""
+            SELECT
+                r.content,
+                r.created_at,
+                u.username
+            FROM replies r
+            LEFT JOIN users u
+                ON r.user_id = u.id
+            WHERE r.thread_id = %s
+            ORDER BY r.created_at ASC;
+        """, (thread_id,))
+
+        replies = cur.fetchall()
+
+
+    except Exception as e:
+
+        print("THREAD ERROR:", e)
+
+        thread = None
+        replies = []
+
+
+    finally:
+
+        cur.close()
+        conn.close()
+
+
+    return render_template(
+        "thread.html",
+        thread=thread,
+        replies=replies,
+        user_id=session.get("user_id")
+    )
+# -----------------------
+# CREATE REPLY
+# -----------------------
+
+@app.route("/replies", methods=["POST"])
+def create_reply():
+
+    if "user_id" not in session:
+        return "Not allowed", 403
+
+
+    thread_id = request.form.get("thread_id")
+    content = request.form.get("content", "").strip()
+
+
+    if not content:
+        return "Reply cannot be empty", 400
+
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+
+    try:
+
+        cur.execute("""
+            INSERT INTO replies
+            (
+                thread_id,
+                user_id,
+                content
+            )
+            VALUES (%s, %s, %s);
+        """,
+        (
+            thread_id,
+            session["user_id"],
+            content
+        ))
+
+
+        conn.commit()
+
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print("REPLY ERROR:", e)
+
+        return "Failed to create reply", 500
+
+
+    finally:
+
+        cur.close()
+        conn.close()
+
+
+    return redirect(f"/thread/{thread_id}")
 
 # -----------------------
 # LOGIN

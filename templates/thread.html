@@ -75,7 +75,9 @@
             <strong>{{ reply[2] }}</strong>
             <p>{{ reply[0] }}</p>
 
-            <small>{{ reply[1] }}</small>
+            <small>
+                {{ reply[1].strftime('%Y-%m-%d %H:%M') if reply[1] }}
+            </small>
 
         </div>
         {% endfor %}
@@ -93,7 +95,7 @@
         <input type="hidden" name="thread_id" value="{{ thread[0] }}">
 
         <textarea
-            name="message"
+            name="content"
             placeholder="Write your reply..."
             required
         ></textarea>

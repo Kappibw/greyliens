@@ -16,7 +16,7 @@ app = Flask(__name__)
 # -----------------------
 # SECURITY CONFIG
 # -----------------------
-
+# Flask uses SECRET_KEY to securely sign session cookies. This key should be kept secret and not hard-coded in the source code. Instead, it is loaded from an environment variable for security.
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 if not app.config["SECRET_KEY"]:

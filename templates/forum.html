@@ -205,61 +205,45 @@
     <!-- THREADS -->
 
 
-    <div class="threads">
+   <div class="threads">
 
+    <h3>Threads</h3>
 
-        <h3>Threads</h3>
+    {% if threads %}
 
+        {% for thread in threads %}
 
-        {% if threads %}
+            <div class="card">
 
-
-            {% for thread in threads %}
-
-
-                <div class="card">
-
-
-                    <h4>
+                <h4>
+                    <a href="/thread/{{ thread[0] }}">
                         {{ thread[1] }}
-                    </h4>
+                    </a>
+                </h4>
 
+                <small>
+                    By {{ thread[2] if thread[2] else "Unknown User" }}
+                </small>
 
-                    <small>
-                        By {{ thread[2] if thread[2] else "Unknown User" }}
-                    </small>
+                <br>
 
+                <small>
+                    {{ thread[3].strftime('%Y-%m-%d %H:%M') if thread[3] }}
+                </small>
 
-                    <br>
+            </div>
 
+        {% endfor %}
 
-                    <small>
-                        {{ thread[3].strftime('%Y-%m-%d %H:%M') if thread[3] }}
-                    </small>
+    {% else %}
 
+        <p class="empty">
+            No threads available.
+        </p>
 
-                </div>
+    {% endif %}
 
-
-            {% endfor %}
-
-
-        {% else %}
-
-
-            <p class="empty">
-                No threads available.
-            </p>
-
-
-        {% endif %}
-
-
-    </div>
-
-
-
-
+</div>
 
     <!-- MESSAGES / CONVERSATION -->
 

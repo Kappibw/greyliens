@@ -171,16 +171,29 @@
             <ul>
 
 
-            {% for channel in channels %}
+           <ul>
+
+<li>
+    <a href="/">
+        🌌 All Channels
+    </a>
+</li>
 
 
-                <li>
-                    # {{ channel[1] }}
-                </li>
+{% for channel in channels %}
+
+<li>
+
+    <a href="/?channel={{ channel[0] }}">
+        # {{ channel[1] }}
+    </a>
+
+</li>
+
+{% endfor %}
 
 
-            {% endfor %}
-
+</ul>
 
             </ul>
 
@@ -208,6 +221,44 @@
    <div class="threads">
 
     <h3>Threads</h3>
+    {% if identity != "logged_out" %}
+
+    <div class="card">
+
+    <h4>Create Thread</h4>
+
+    <form action="/threads/create" method="POST">
+
+    <input 
+    name="title"
+    placeholder="Thread title"
+    required
+    >
+
+
+    <select name="channel_id" required>
+
+    {% for channel in channels %}
+
+    <option value="{{ channel[0] }}">
+    {{ channel[1] }}
+    </option>
+
+    {% endfor %}
+
+    </select>
+
+
+    <button type="submit">
+    Create Thread
+    </button>
+
+
+    </form>
+
+    </div>
+
+    {% endif %}
 
     {% if threads %}
 
@@ -232,7 +283,17 @@
                 </small>
 
             </div>
+            {% if user == thread[2] %}
 
+    <form action="/threads/delete/{{ thread[0] }}" method="POST">
+
+    <button type="submit">
+    Delete Thread
+    </button>
+
+    </form>
+
+    {% endif %}
         {% endfor %}
 
     {% else %}
@@ -243,7 +304,7 @@
 
     {% endif %}
 
-</div>
+    </div>
 
     <!-- MESSAGES / CONVERSATION -->
 

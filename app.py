@@ -1,11 +1,34 @@
 from flask import Flask, render_template, request, redirect, session
 from dotenv import load_dotenv
 import os
-
+import random
 from db import get_conn
 from auth import get_identity
 
+def get_random_transmission():
 
+    conn = get_conn()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT category, fact, rarity
+            FROM space_facts
+            ORDER BY RANDOM()
+            LIMIT 1;
+        """)
+
+        transmission = cur.fetchone()
+
+    except Exception as e:
+        print("TRANSMISSION ERROR:", e)
+        transmission = None
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return transmission
 # Load environment variables
 load_dotenv()
 
@@ -83,40 +106,18 @@ def index():
         threads = []
 
 
-    # -----------------------
-    # Load Messages
-    # -----------------------
-
-    try:
-        cur.execute("""
-            SELECT
-                m.id,
-                m.thread_id,
-                m.content,
-                u.username,
-                m.created_at
-            FROM messages m
-            LEFT JOIN users u
-                ON m.user_id = u.id
-            ORDER BY m.created_at ASC;
-        """)
-
-        messages = cur.fetchall()
-
-    except Exception:
-        conn.rollback()
-        messages = []
-
+    
 
     cur.close()
     conn.close()
 
+    
 
     return render_template(
         "forum.html",
         channels=channels,
         threads=threads,
-        messages=messages,
+        fact=get_random_transmission(),
         user=session.get("username"),
         identity=get_identity()
     )

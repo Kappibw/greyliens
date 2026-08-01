@@ -245,127 +245,68 @@
 
 </div>
 
-    <!-- MESSAGES / CONVERSATION -->
+   <!-- GREYLIENS INTELLIGENCE FEED -->
 
+<div class="conversation">
 
-    <div class="conversation">
+    <h3>
+        🛸 Greyliens Intelligence Feed
+    </h3>
 
 
-        <h3>
-            Conversation
-        </h3>
+    {% if fact %}
 
+    <div class="transimission-card">
 
 
-        <!-- POST MESSAGE -->
+        <p>
+            📡 Incoming Transmission...
+        </p>
 
 
-        {% if identity != "logged_out" %}
+        <hr>
 
 
-            <form action="/send" method="post">
+        <h4>
+            {{ fact[0] }}
+        </h4>
 
 
-                <textarea
-                    name="content"
-                    rows="3"
-                    style="width:100%"
-                    placeholder="Write a message..."
-                ></textarea>
+        <p>
+            {{ fact[1] }}
+        </p>
 
 
-                <div style="text-align:right; margin-top:6px">
+        <hr>
 
 
-                    <button type="submit">
-                        Send
-                    </button>
+        <small>
+            🛰️ Signal Classification:
+            {{ fact[2] }}
+        </small>
 
 
-                </div>
+        <br><br>
 
-            </form>
 
-
-            <hr>
-
-
-
-        {% else %}
-
-
-            <p class="empty">
-                Login to post messages.
-            </p>
-
-
-
-        {% endif %}
-
-
-
-
-
-        <!-- DISPLAY MESSAGES -->
-
-
-        {% if messages %}
-
-
-
-            {% for message in messages %}
-
-
-
-                <div class="card">
-
-
-
-                    <strong>
-                        {{ message[3] if message[3] else "Unknown User" }}
-                    </strong>
-
-
-
-                    <p>
-                        {{ message[2] }}
-                    </p>
-
-
-
-                    <small>
-                        {{ message[4].strftime('%Y-%m-%d %H:%M') if message[4] }}
-                    </small>
-
-
-
-                </div>
-
-
-
-            {% endfor %}
-
-
-
-
-        {% else %}
-
-
-
-            <p class="empty">
-                No messages available.
-            </p>
-
-
-
-        {% endif %}
-
-
+        <a href="/">
+            <button>
+                Receive Next Transmission
+            </button>
+        </a>
 
 
     </div>
 
 
+    {% else %}
+
+    <p class="empty">
+        No transmissions detected.
+    </p>
+
+
+    {% endif %}
 
 
 </div>

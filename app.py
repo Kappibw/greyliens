@@ -41,6 +41,8 @@ def index():
     conn = get_conn()
     cur = conn.cursor()
 
+    selected_channel = request.args.get("channel")
+
     # -----------------------
     # Load Channels
     # -----------------------
@@ -64,19 +66,33 @@ def index():
     # -----------------------
 
     try:
-        cur.execute("""
-            SELECT
-                t.id,
-                t.title,
-                u.username,
-                t.created_at,
-                t.author_id
-            FROM threads t
-            LEFT JOIN users u
-                ON t.author_id = u.id
-            ORDER BY t.created_at DESC;
-        """)
-
+        if selected_channel:
+            cur.execute("""
+                SELECT
+                    t.id,
+                    t.title,
+                    u.username,
+                    t.created_at,
+                    t.author_id
+                FROM threads t
+                LEFT JOIN users u
+                    ON t.author_id = u.id
+                WHERE t.channel_id = %s
+                ORDER BY t.created_at DESC;
+            """, (selected_channel,))
+        else:
+            cur.execute("""
+                SELECT
+                    t.id,
+                    t.title,
+                    u.username,
+                    t.created_at,
+                    t.author_id
+                FROM threads t
+                LEFT JOIN users u
+                    ON t.author_id = u.id
+                ORDER BY t.created_at DESC;
+            """)   
         threads = cur.fetchall()
 
     except Exception:
@@ -118,6 +134,7 @@ def index():
         channels=channels,
         threads=threads,
         messages=messages,
+        selected_channel=selected_channel,
         user=session.get("username"),
         identity=get_identity()
     )

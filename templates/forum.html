@@ -183,13 +183,16 @@
 {% for channel in channels %}
 
 <li>
-
-    <a href="/?channel={{ channel[0] }}">
-        # {{ channel[1] }}
-    </a>
-
+    {% if selected_channel == channel[0]|string %}
+        <a href="/?channel={{ channel[0] }}" style="font-weight:bold; color:#007bff;">
+            # {{ channel[1] }}
+        </a>
+    {% else %}
+        <a href="/?channel={{ channel[0] }}">
+            # {{ channel[1] }}
+        </a>
+    {% endif %}
 </li>
-
 {% endfor %}
 
 

@@ -64,6 +64,8 @@ def index():
     conn = get_conn()
     cur = conn.cursor()
 
+    selected_channel = request.args.get("channel")
+
     # -----------------------
     # Load Channels
     # -----------------------
@@ -87,18 +89,33 @@ def index():
     # -----------------------
 
     try:
-        cur.execute("""
-            SELECT
-                t.id,
-                t.title,
-                u.username,
-                t.created_at
-            FROM threads t
-            LEFT JOIN users u
-                ON t.author_id = u.id
-            ORDER BY t.created_at DESC;
-        """)
-
+        if selected_channel:
+            cur.execute("""
+                SELECT
+                    t.id,
+                    t.title,
+                    u.username,
+                    t.created_at,
+                    t.author_id
+                FROM threads t
+                LEFT JOIN users u
+                    ON t.author_id = u.id
+                WHERE t.channel_id = %s
+                ORDER BY t.created_at DESC;
+            """, (selected_channel,))
+        else:
+            cur.execute("""
+                SELECT
+                    t.id,
+                    t.title,
+                    u.username,
+                    t.created_at,
+                    t.author_id
+                FROM threads t
+                LEFT JOIN users u
+                    ON t.author_id = u.id
+                ORDER BY t.created_at DESC;
+            """)   
         threads = cur.fetchall()
 
     except Exception:
@@ -121,7 +138,124 @@ def index():
         user=session.get("username"),
         identity=get_identity()
     )
+# -----------------------
+# CREATE THREAD
+# -----------------------
 
+@app.route("/threads/create", methods=["POST"])
+def create_thread():
+
+    # Only logged-in users can create threads
+    if "user_id" not in session:
+        return "Login required", 403
+
+
+    title = request.form.get("title", "").strip()
+    channel_id = request.form.get("channel_id")
+
+
+    if not title:
+        return "Thread title required", 400
+
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+
+    try:
+
+        cur.execute("""
+            INSERT INTO threads
+            (
+                title,
+                author_id,
+                channel_id
+            )
+            VALUES (%s, %s, %s);
+        """,
+        (
+            title,
+            session["user_id"],
+            channel_id
+        ))
+
+
+        conn.commit()
+
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print("CREATE THREAD ERROR:", e)
+
+        return "Failed to create thread", 500
+
+
+    finally:
+
+        cur.close()
+        conn.close()
+
+
+    return redirect("/")
+# -----------------------
+# DELETE THREAD
+# -----------------------
+
+@app.route("/threads/delete/<int:thread_id>", methods=["POST"])
+def delete_thread(thread_id):
+
+    if "user_id" not in session:
+        return "Login required", 403
+
+
+    conn = get_conn()
+    cur = conn.cursor()
+
+
+    
+    try:
+
+    # Delete replies belonging to the thread first
+        cur.execute("""
+        DELETE FROM replies
+        WHERE thread_id = %s;
+        """,
+        (thread_id,))
+
+
+    # Delete the thread only if the user owns it
+        cur.execute("""
+        DELETE FROM threads
+        WHERE id = %s
+        AND author_id = %s;
+        """,
+        (
+        thread_id,
+        session["user_id"]
+        ))
+
+
+        conn.commit()
+
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print("DELETE THREAD ERROR:", e)
+
+        return "Delete failed", 500
+
+
+    finally:
+
+        cur.close()
+        conn.close()
+
+
+    return redirect("/")
 # -----------------------
 # SEND MESSAGE
 # -----------------------

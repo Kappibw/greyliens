@@ -285,7 +285,7 @@
                     {{ thread[3].strftime('%Y-%m-%d %H:%M') if thread[3] }}
                 </small>
 
-            </div>
+            
             {% if user == thread[2] %}
 
     <form action="/threads/delete/{{ thread[0] }}" method="POST">
@@ -297,6 +297,9 @@
     </form>
 
     {% endif %}
+    
+            </div>
+
         {% endfor %}
 
     {% else %}

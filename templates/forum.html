@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Greyliens Forum</title>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <style>
         body{
             margin:0;
@@ -290,8 +290,8 @@
 
     <form action="/threads/delete/{{ thread[0] }}" method="POST">
 
-    <button type="submit">
-    Delete Thread
+    <button type="submit" aria-label="Delete Thread" >
+        <i class="fas fa-trash"></i>
     </button>
 
     </form>

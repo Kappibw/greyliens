@@ -2,37 +2,76 @@
 <html>
 <head>
     <title>Greyliens Forum</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <style>
-        :root {
+        :root{
 
-            /* Greyliens Sci-Fi Colour System */
+                /* Backgrounds */
+                --bg-main:#161320;
+                --bg-panel:#211C35;
+                --bg-card:#2B2545;
 
-            --bg-main:#081416;
-            --bg-card: #122225;
-            --bg-panel: #0d1c1f;
+                /* Primary Colours */
+                --pink:#F3A8C8;
+                --lavender:#C9B8FF;
+                --mint:#B8F2E6;
 
-            --primary: #8fb8a5;
-            --accent: #ff8fc7;
-            --pink: #e88bb8
+                /* Theme Colours */
+                --primary:var(--pink);
+                --secondary:var(--lavender);
+                --accent:var(--pink);
 
-            --text-main: #f4eee6;
-            --text-muted: #a7b5b0;
+                /* Text */
+                --text-main:#FFF9FD;
+                --text-muted:#B9B5C8;
 
-            --border: #334747;
+                /* Borders */
+                --border:#433B62;
 
-            --success: #8fbf8f;
-            --warning: #d9b45b;
-            --danger: #d66b6b;
+                /* Status */
+                --success:#83D39C;
+                --warning:#F2C46F;
+                --danger:#F28BA8;
+
+                /* Shadows */
+                --shadow:rgba(0,0,0,.35);
+
+                /* Border Radius */
+                --radius:18px;
 
         }
+
+           /* Greyliens Sci-Fi Colour System */
+
+            
+    
         body{
             margin:0;
-            font-family:Arial,sans-serif;
-            background:radial-gradient(circle at top right,rgba(232,139,184,0.15),transparent 35%),
-            radial-gradient(circle at bottom left,rgba(143,184,165,0.12),transparent 40%),
-            var(--bg-main);
+            font-family:"Poppins",sans-serif;
+            background:radial-gradient(circle at top left,rgba(243,168,200,0.12),transparent 30%),
+            radial-gradient(circle at top right,rgba(201,184,255,0.10),transparent 35%),
+            radial-gradient(circle at bottom left,rgba(184,242,230,0.08),transparent 40%),
+            linear-gradient(180deg,#161320 0%,#1B1730 45%,#151222 100%);
+            
             color:var(--text-main);
+            position:relative;
+        }
+        body::before {
+            content:"";
+            position:fixed;
+            inset:0;
+
+            background-image:
+            radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px);
+
+            background-size:55px 55px;
+            opacity:0.25;
+
+            pointer-events:none;
+            z-index:0;
         }
 
         .top-bar{
@@ -40,20 +79,22 @@
             justify-content:space-between;
             align-items:center;
             padding:18px 30px;
-            background:rgba(13,28,31,0.9);
-            border-bottom:1px solid var(--border);
-            backdrop-filter:blur(10px);
+            background:rgba(22,19,32,0.85);
+            border-bottom:1px solid rgba(243,168,200,0.25);
+            backdrop-filter:blur(12px);
         }
 
         .layout{
             display:flex;
-            height:calc(100vh - 70px);
+            min-height:calc(100vh - 70px);
+            height:auto;
             gap:0;
             overflow:hidden;
         }
 
         .sidebar{
-            width:20%;
+            flex:1;
+            min-width:200px;
             background:var(--bg-panel);
             border-right:1px solid var(--border);
             padding:20px;
@@ -63,16 +104,19 @@
         }
 
         .threads{
-            width:35%;
-            background:#0a181b;
-            border-right:1px solid var(--border);
+            flex:1.7;
+            min-width:280px;
+            background:rgba(20,18,38,0.75);
+            backdrop-filter:blur(12px);
+            border-right:1px solid rgba(243,168,200,0.25);
             padding:20px;
             overflow-y:auto;
             box-sizing:border-box;
         }
 
         .conversation{
-            width:45%;
+            flex:2;
+            min-width:320px
             background:var(--bg-main);
             padding:20px;
             overflow-y:auto;
@@ -88,20 +132,33 @@
         }
 
         .card{
-            background:var(--bg-card);
-            border:1px solid var(--border);
-            border-radius:12px;
-            padding:15px;
-            margin-bottom:15px;
-            transition:0.3s;
+            background:rgba(43,37,69,0.75);
+            backdrop-filter:blur(10px);
+
+            border:1px solid rgba(243,168,200,0.25);
+            border-radius:18px;
+
+            padding:18px;
+            margin-bottom:16px;
+
+            transition:0.3s ease;
+
             box-shadow:
             0 10px 30px rgba(0,0,0,0.35),
-            0 0 20px rgba(232,139,184,0.08);
+            0 0 20px rgba(243,168,200,0.12);
         }
+
+
         .card:hover{
             transform:translateY(-3px);
-            border-colour:var(--primary);
+
+            border-color:var(--primary);
+
+            box-shadow:
+            0 15px 35px rgba(0,0,0,0.4),
+            0 0 25px rgba(243,168,200,0.25);
         }
+            
 
         ul{
             list-style:none;
@@ -132,24 +189,70 @@
         }
         .transmission-card{
 
-    background:var(--bg-card);
+        background:rgba(43,37,69,0.75);
+        backdrop-filter:blur(12px);
 
-    border:1px solid var(--border);
+        border:1px solid rgba(201,184,255,0.35);
 
-    border-radius:16px;
+        border-radius:20px;
 
-    padding:20px;
+        padding:25px;
 
-    box-shadow:0 0 20px rgba(143,184,165,0.15);
+        box-shadow:
+        0 15px 40px rgba(0,0,0,0.35),
+        0 0 25px rgba(201,184,255,0.18);
+        position:relative;
+        overflow:hidden;
+
+        }
+        .transmission-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:-100%;
+
+    left:0;
+
+    width:100%;
+
+    height:50%;
+
+    background:linear-gradient(
+        to bottom,
+        transparent,
+        rgba(243,168,200,0.15),
+        transparent
+    );
+
+    animation:scanSignal 5s infinite;
 
 }
 
 
-.transmission-card h4{
+@keyframes scanSignal{
 
-    color:var(--primary);
+    0%{
+
+        top:-50%;
+
+    }
+
+    100%{
+
+        top:120%;
+
+    }
 
 }
+
+
+        .transmission-card h4{
+
+            color:var(--primary);
+
+        }
 
 
 .transmission-card p{
@@ -166,21 +269,24 @@
 }
 button{
 
-    background:var(--accent);
+    background:linear-gradient(135deg,var(--pink),var(--lavender));
 
-    color:#081416;
+    color:#161320;
 
     border:none;
 
-    padding:8px 15px;
+    padding:10px 18px;
 
-    border-radius:8px;
+    border-radius:14px;
 
     cursor:pointer;
+    font-family:"Poppins",sans-serif;
 
-    font-weight:bold;
+    font-weight:600;
+    letter-spacing:0.5px;
 
-    transition:0.3s;
+    transition:0.3s ease;
+    box-shadow:0 0 15px rgba(243,168,200,0.25);
 
 }
 
@@ -214,32 +320,46 @@ a:hover{
 
     align-items:center;
 
-    gap:10px;
+    gap:12px;
 
-    background:var(--bg-panel);
+    background:rgba(43,37,69,0.65);
+    backdrop-filter:blur(10px);
 
-    padding:8px 12px;
+    padding:10px 16px;
 
-    border-radius:10px;
+    border-radius:18px;
 
-    border:1px solid var(--border);
+    border:1px solid rgba(243,168,200,0.25);
     font-size:14px;
     color:var(--text-muted);
+    box-shadow:0 0 20px rgba(201,184,255,0.12);
 
 }
-.brand-title{
-    font-size:22px;
 
+.brand-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #f7c6dc;
+}
+h3 i{
+    margin-right:8px;
     color:var(--pink);
+    font-size:20px;
+    filter:drop-shadow(0 0 8px rgba(243,168,200,0.5));
+}
 
-    letter-spacing:2px;
+.brand-title i {
+    font-size: 28px;
+    color: #d98bb9;
+    filter: drop-shadow(0 0 8px rgba(217, 139, 185, 0.6));
+}
 
-    font-weight:700;
-
-    text-transform:uppercase;
-
-    text-shadow:0 0 15px rgba(232,139,184,0.5);
-
+.brand-title span {
+    font-size: 24px;
 }
 .loading{
 
@@ -265,51 +385,58 @@ a:hover{
     margin-right:8px;
 
 }
-.thread-title{
+        .thread-title{
 
-    font-size:18px;
+    font-size:17px;
 
-    font-weight:bold;
+    font-weight:600;
 
-    color:var(--text-main);
-
+    color:#f8d8e8;
+    transition:0.3s ease;
 }
 
 
 .thread-title:hover{
 
-    color:var(--accent);
+    color:#f3a8c8;
+    transform:translateX(4px);
 
 }
 .sidebar a{
 
-    display:block;
+    display:flex;
+    align-items:center;
+    gap:8px;
 
-    padding:10px 12px;
+    padding:12px 14px;
 
-    border-radius:8px;
+    border-radius:14px;
 
     color:var(--text-muted);
+    background:rgba(43,37,69,0.35);
+    border:1px solid transparent;
 
-    transition:0.3s;
+    transition:0.3s ease;
 
 }
 
 
 .sidebar a:hover{
 
-    background:var(--bg-card);
+    background:rgba(243,168,200,0.12);
 
-    color:var(--primary);
+    color:var(--pink);
+    border-colour:rgba(243,168,200,0.35);
+    transform:translateX(5px);
 
 }
 .active-channel{
 
-    background:var(--bg-card);
+    background:rgba(201,184,255,0.18);
 
-    color:var(--primary) !important;
+    color:var(--pink) !important;
 
-    border-left:3px solid var(--accent);
+    border-left:3px solid var(--pink);
 
 }
 input,
@@ -359,6 +486,7 @@ form button{
         flex-direction:column;
 
         height:auto;
+        overflow:visible;
 
     }
 
@@ -368,7 +496,7 @@ form button{
     .conversation{
 
         width:100%;
-
+        min-width:0;
         border-right:none;
 
     }
@@ -377,30 +505,236 @@ form button{
     .top-bar{
 
         flex-direction:column;
-
+        text-align:center;
         gap:15px;
+
+    }
+     .brand-title span{
+
+        font-size:20px;
+
+    }
+
+
+    .floating-ship{
+
+        display:none;
 
     }
 
 }
 .delete-btn{
 
-    background:transparent;
+    background:rgba(242,139,168,0.08);
 
-    color:var(--pink);
+    color:#f28ba8;
 
-    border:1px solid var(--pink);
+    border:1px solid rgba(242,139,168,0.5);
 
-    padding:6px 10px;
+    padding:7px 11px;
+    border-radius:12px;
+    transition:0.3s ease;
 
 }
 
 
 .delete-btn:hover{
 
-    background:var(--pink);
+    background:#f28ba8;
 
-    color:white;
+    color:#161320;
+    transform:scale(1.08);
+    box-shadow:0 0 15px rgba(242,139,168,0.5);
+
+}
+.floating-ship {
+    font-size:32px;
+    color:#f3a8c8;
+    animation: floatShip 4s ease-in-out infinite;
+    filter:drop-shadow(0 0 10px rgba(243,168,200,0.7));
+}
+
+@keyframes floatShip {
+
+    0%,100% {
+        transform:translateY(0);
+    }
+
+    50% {
+        transform:translateY(-8px);
+    }
+}
+.sidebar a i{
+
+    color:var(--lavender);
+
+    font-size:14px;
+
+    transition:0.3s;
+
+}
+
+
+.sidebar a:hover i{
+
+    color:var(--pink);
+
+    transform:rotate(15deg);
+
+}
+.threads .card h4{
+
+    color:var(--pink);
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    letter-spacing:1px;
+
+}
+.threads .card h4 i{
+
+    color:var(--lavender);
+
+    filter:drop-shadow(0 0 8px rgba(201,184,255,0.6));
+
+}
+.card form{
+
+    display:inline-block;
+
+}
+.signal-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    margin-bottom:15px;
+
+    padding:8px 14px;
+
+    border-radius:20px;
+
+    background:rgba(184,242,230,0.12);
+
+    border:1px solid rgba(184,242,230,0.35);
+
+    color:var(--mint);
+
+    font-size:13px;
+
+}
+
+
+.signal-badge i{
+
+    font-size:10px;
+
+    animation:pulseSignal 1.5s infinite;
+
+}
+
+
+@keyframes pulseSignal{
+
+    50%{
+
+        opacity:0.4;
+
+    }
+
+}
+.space-particle{
+    position:fixed;
+    width:5px;
+    height:5px;
+    background:white;
+    border-radius:50%;
+    opacity:0.5;
+    pointer-events:none;
+    animation:floatParticle 8s infinite ease-in-out;
+}
+
+
+@keyframes floatParticle{
+
+    0%,100%{
+        transform:translateY(0);
+        opacity:0.2;
+    }
+
+    50%{
+        transform:translateY(-25px);
+        opacity:0.7;
+    }
+
+}
+.incoming-transmission{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    color:var(--pink);
+
+    font-weight:600;
+
+    letter-spacing:1px;
+
+    animation:signalPulse 2s infinite;
+
+}
+
+
+.incoming-transmission i{
+
+    color:var(--mint);
+
+    filter:drop-shadow(0 0 8px rgba(184,242,230,0.7));
+
+    animation:rotateSignal 3s linear infinite;
+
+}
+
+
+@keyframes signalPulse{
+
+    0%,100%{
+
+        opacity:0.5;
+
+    }
+
+    50%{
+
+        opacity:1;
+
+    }
+
+}
+
+
+@keyframes rotateSignal{
+
+    from{
+
+        transform:rotate(0deg);
+
+    }
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
 
 }
     </style>
@@ -409,13 +743,19 @@ form button{
 
 
 <body>
-
+<div class="space-particle" style="top:20%; left:10%;"></div>
+<div class="space-particle" style="top:70%; left:25%; animation-delay:2s;"></div>
+<div class="space-particle" style="top:35%; left:80%; animation-delay:4s;"></div>
+<div class="space-particle" style="top:85%; left:65%; animation-delay:1s;"></div>
+<div class="space-particle" style="top:15%; left:55%; animation-delay:3s;"></div>
 
 <div class="top-bar">
 
     <h2 class="brand-title">
-        Greyliens Forum
+        <i class="fa-solid fa-user-astronaut"></i>
+        <span>Greyliens Forum</span>
     </h2>
+    <i class="fa-solid fa-shuttle-space floating-ship"></i>
 
 
     <div class="identity-box">
@@ -499,7 +839,10 @@ form button{
     <div class="sidebar">
 
 
-        <h3>Channels</h3>
+        <h3>
+            <i class="fa-solid fa-satellite"></i>
+            Channels
+        </h3>
 
 
         {% if channels %}
@@ -512,6 +855,7 @@ form button{
 
 <li>
     <a href="/">
+        <i class="fa-solid fa-earth-americas"></i>
         All Channels
     </a>
 </li>
@@ -560,12 +904,19 @@ form button{
 
    <div class="threads">
 
-    <h3>Threads</h3>
+    <h3>
+        <i class="fa-solid fa-comments"></i>
+        Threads
+    </h3>
     {% if identity != "logged_out" %}
 
     <div class="card">
 
-    <h4>Create Thread</h4>
+    <h4>
+        <i class="fa-solid fa-rocket"></i>
+        Create 
+        
+    </h4>
 
     <form action="/threads/create" method="POST">
 
@@ -654,8 +1005,13 @@ form button{
 <div class="conversation">
 
     <h3>
+        <i class="fa-solid fa-satellite-dish"></i>
          Greyliens Intelligence Feed
     </h3>
+    <div class="signal-badge">
+        <i class="fa-solid fa-circle-dot"></i>
+        Signal Active
+    </div>
    
 
 
@@ -664,7 +1020,8 @@ form button{
     <div class="transmission-card">
 
 
-        <p>
+        <p class="incoming-transmission">
+           <i class="incoming-transmission"></i>
              Incoming Transmission...
         </p>
 

@@ -8,206 +8,430 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <style>
-        body {
-           
+    :root {
+    --bg-main: #fbf8f3;
+    --bg-card: #fffdfb;
+    --bg-soft: #fff8f5;
+    --border-soft:#eee4dd;
+    --pink: #e99a9d;
+    --pink-soft: #f9e5e2;
+    --pink-light: #fdf1ef;
 
-             margin:0;
+    --lavender: #ddd5e5;
+    --lavender-soft: #eee8f0;
 
-            min-height:100vh;
+    --sage-soft: #edf0e7;
 
-            font-family:"Poppins",sans-serif;
+    --text-main: #403833;
+    --text-muted: #756b64;
 
-            color:#FFF9FD;
+    --border: #e7d9d0;
 
-            background:
-            radial-gradient(circle at top left,rgba(243,168,200,0.12),transparent 30%),
-            radial-gradient(circle at top right,rgba(201,184,255,0.10),transparent 35%),
-            linear-gradient(180deg,#161320,#151222);
-
-            padding:30px;
-
- 
-        }
-
-        .thread {
-            background:rgba(43,37,69,0.75);
-
-            backdrop-filter:blur(12px);
-
-            border:1px solid rgba(243,168,200,0.3);
-
-            padding:25px;
-
-            margin-bottom:25px;
-
-            border-radius:20px;
-
-            box-shadow:
-            0 15px 40px rgba(0,0,0,0.35),
-            0 0 25px rgba(243,168,200,0.15);
-        }
-
-        .reply {
-         background:rgba(33,28,53,0.75);
-
-    backdrop-filter:blur(10px);
-
-    border-left:4px solid var(--pink);
-
-    padding:18px;
-
-    margin-bottom:15px;
-
-    border-radius:16px;
-
-    box-shadow:
-    0 10px 25px rgba(0,0,0,0.25),
-    0 0 15px rgba(243,168,200,0.12);
-        }
-
-        textarea {
-            
-
-    width:100%;
-
-    min-height:120px;
-
-    padding:15px;
-
-    box-sizing:border-box;
-
-    resize:none;
-
-    background:rgba(33,28,53,0.8);
-
-    color:#FFF9FD;
-
-    border:1px solid rgba(201,184,255,0.35);
-
-    border-radius:16px;
-
-    font-family:'Poppins',sans-serif;
-
-    outline:none;
-
-
-        }
-
-        button {
-            button{
-
-    margin-top:12px;
-
-    padding:10px 20px;
-
-    border:none;
-
-    border-radius:14px;
-
-    background:linear-gradient(
-        135deg,
-        #F3A8C8,
-        #C9B8FF
-    );
-
-    color:#161320;
-
-    font-family:'Poppins',sans-serif;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:0.3s;
-
+    --shadow-soft:
+        0 8px 25px rgba(92, 67, 57, 0.07);
 }
 
 
-button:hover{
+/* =========================================
+   THREAD PAGE
+   ========================================= */
 
-    transform:translateY(-3px);
+body {
+    margin: 0;
 
-    box-shadow:
-    0 0 20px rgba(243,168,200,0.4);
+    min-height: 100vh;
 
+    font-family: "Poppins", sans-serif;
 
-        }
+    color: var(--text-main);
 
-        a {
-            text-decoration: none;
-        }
+    background:
+        radial-gradient(
+            circle at 10% 5%,
+            rgba(249, 229, 226, 0.8),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 90% 15%,
+            rgba(221, 213, 229, 0.45),
+            transparent 28%
+        ),
+        var(--bg-main);
 
-        small {
-            color: #B9B5C8;
-        }
-        .thread h1{
+    padding: 35px;
 
-    color:#f7c6dc;
-
-    font-size:32px;
-
-    letter-spacing:1px;
-
-}
-.reply strong{
-
-    color:var(--lavender);
-
-    font-size:16px;
-
-}
-textarea:focus{
-
-    border-color:var(--pink);
-
-    box-shadow:
-    0 0 15px rgba(243,168,200,0.35);
-
-}
-.reply-btn{
-
-    margin-top:12px;
-
-    padding:10px 20px;
-
-    border:none;
-
-    border-radius:14px;
-
-    background:linear-gradient(
-        135deg,
-        #F3A8C8,
-        #C9B8FF
-    ) !important;
-
-    color:#161320 !important;
-
-    font-family:'Poppins',sans-serif;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    box-shadow:
-    0 0 15px rgba(243,168,200,0.35);
-
+    box-sizing: border-box;
 }
 
 
-.reply-btn:hover{
+/* =========================================
+   BACK TO FORUM
+   ========================================= */
 
-    transform:translateY(-3px);
+.back-link {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 24px;
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    transition: 0.2s ease;
+}
+
+.back-link:hover {
+    color: var(--pink);
+
+    transform: translateX(-3px);
+}
+
+
+/* =========================================
+   MAIN THREAD
+   ========================================= */
+
+.thread {
+    max-width: 900px;
+
+    margin: 0 auto 28px;
+
+    background: var(--bg-card);
+
+    border: 1px solid var(--border);
+
+    padding: 30px;
+
+    border-radius: 22px;
+
+    box-shadow: var(--shadow-soft);
+}
+
+
+/* Thread title */
+
+.thread h1 {
+    margin: 0 0 14px;
+
+    color: var(--text-main);
+
+    font-size: 30px;
+
+    font-weight: 600;
+
+    letter-spacing: -0.5px;
+
+    line-height: 1.3;
+}
+
+
+/* Thread content */
+
+.thread > p {
+    color: var(--text-muted);
+
+    font-size: 14px;
+
+    line-height: 1.8;
+
+    margin: 0 0 18px;
+}
+
+
+/* Thread metadata */
+
+.thread small {
+    display: block;
+
+    color: #988b84;
+
+    font-size: 12px;
+
+    padding-top: 16px;
+
+    border-top: 1px solid var(--border-soft, #eee4dd);
+}
+
+
+/* =========================================
+   CONVERSATION
+   ========================================= */
+
+.conversation-title {
+    max-width: 900px;
+
+    margin: 0 auto 16px;
+
+    color: var(--text-main);
+
+    font-size: 19px;
+
+    font-weight: 600;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+}
+
+.conversation-title i {
+    color: var(--pink);
+
+    font-size: 17px;
+}
+
+
+/* =========================================
+   REPLIES
+   ========================================= */
+
+.reply {
+    max-width: 900px;
+
+    margin: 0 auto 14px;
+
+    background: var(--bg-card);
+
+    border: 1px solid var(--border);
+
+    border-left: 3px solid #e6b4b3;
+
+    padding: 20px 22px;
+
+    border-radius: 17px;
+
+    box-shadow: 0 5px 18px rgba(92, 67, 57, 0.05);
+
+    transition: 0.2s ease;
+}
+
+.reply:hover {
+    transform: translateY(-1px);
+
+    border-left-color: var(--pink);
+
+    box-shadow: 0 8px 22px rgba(92, 67, 57, 0.07);
+}
+
+
+/* Reply author */
+
+.reply strong {
+    color: var(--text-main);
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+/* Reply content */
+
+.reply p {
+    color: var(--text-muted);
+
+    font-size: 13px;
+
+    line-height: 1.8;
+
+    margin: 10px 0;
+}
+
+
+/* Reply date */
+
+.reply small {
+    color: #a0958e;
+
+    font-size: 11px;
+}
+
+
+/* =========================================
+   REPLY FORM
+   ========================================= */
+
+.reply-form {
+    max-width: 900px;
+
+    margin: 28px auto 0;
+
+    background: var(--pink-light);
+
+    border: 1px solid #efd8d3;
+
+    border-radius: 20px;
+
+    padding: 24px;
+
+    box-sizing: border-box;
+}
+
+.reply-form h3 {
+    margin: 0 0 15px;
+
+    color: var(--text-main);
+
+    font-size: 17px;
+
+    font-weight: 600;
+}
+
+.reply-form h3 i {
+    color: var(--pink);
+
+    margin-right: 7px;
+}
+
+
+/* Textarea */
+
+textarea {
+    width: 100%;
+
+    min-height: 120px;
+
+    padding: 14px;
+
+    box-sizing: border-box;
+
+    resize: vertical;
+
+    background: #fffdfb;
+
+    color: var(--text-main);
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition: 0.2s ease;
+}
+
+textarea::placeholder {
+    color: #aaa099;
+}
+
+textarea:focus {
+    border-color: var(--pink);
 
     box-shadow:
-    0 0 25px rgba(243,168,200,0.5);
+        0 0 0 3px rgba(233, 154, 157, 0.12);
+}
 
+
+/* =========================================
+   BUTTON
+   ========================================= */
+
+.reply-btn {
+    margin-top: 12px;
+
+    padding: 10px 18px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: var(--pink) !important;
+
+    color: white !important;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+
+    box-shadow: none;
+}
+
+.reply-btn:hover {
+    background: #d9878b !important;
+
+    transform: translateY(-1px);
+
+    box-shadow: none;
+}
+
+
+/* =========================================
+   EMPTY STATES
+   ========================================= */
+
+.empty-replies {
+    max-width: 900px;
+
+    margin: 0 auto;
+
+    padding: 22px;
+
+    background: var(--bg-card);
+
+    border: 1px dashed var(--border);
+
+    border-radius: 16px;
+
+    text-align: center;
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    body {
+        padding: 20px;
+    }
+
+    .thread {
+        padding: 22px;
+    }
+
+    .thread h1 {
+        font-size: 24px;
+    }
+
+    .reply {
+        padding: 17px;
+    }
+
+    .reply-form {
+        padding: 20px;
+    }
 }
     </style>
 </head>
 
 <body>
 
-<a href="/">← Back to Forum</a>
+<a href="/"class="back-link"</a>
+    <iclass="fa-solid fa-arrow-left"></i>
+    Back to forum
+</a>
 
 {% if thread %}
 
@@ -223,7 +447,10 @@ textarea:focus{
         </small>
     </div>
 
-    <h2>Conversation</h2>
+    <h2 class="conversation-title>"</h2class></h2>
+    <i class="fa-solid fa-comments">
+        Conversation
+    </i>
 
     {% if replies and replies|length > 0 %}
 
@@ -241,14 +468,15 @@ textarea:focus{
         {% endfor %}
 
     {% else %}
-        <p>No replies yet. Start the conversation!</p>
+        <p class="empty-replies">
+            No replies yet. Start the conversation!</p>
     {% endif %}
 
     {% if user_id %}
-
+    <div class="reply-form">  
     <h3>
-        <i class="fa-solid fa-satellite-dish"></i>
-        Send Transmission  
+        <i class="fa-solid fa-paper-plane"></i>
+        Join the conversation
     </h3>
 
     <form action="/replies" method="POST">
@@ -257,17 +485,17 @@ textarea:focus{
 
         <textarea
             name="content"
-            placeholder="Write your reply..."
+            placeholder="Share your thoughts.."
             required
         ></textarea>
 
         <button class="reply-btn" type="submit">
             <i class="fa-solid fa-paper-plane"></i>
-            Send Transmission 
+            Send reply 
 
         </button>
     </form>
-
+</div>  
     {% endif %}
 
 {% else %}

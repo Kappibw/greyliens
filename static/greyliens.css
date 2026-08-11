@@ -1,0 +1,53 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin:0;
+    font-family: "Poppins", sans-serif;
+    background:
+        radial-gradient(circle at top, #30204f, #121022 60%);
+    color: var(--star-white);
+    min-height:100vh;
+}
+
+
+:root {
+
+    --space-dark:#121022;
+    --space-card:#1c1833;
+    --pink-soft:#f5b8d8;
+    --pink-glow:#ff8fc7;
+    --purple-soft:#bca7ff;
+    --star-white:#fff5fb;
+    --text-muted:#c8bfd9;
+    --border:rgba(255,255,255,.12);
+
+}
+
+
+.card {
+
+    background:rgba(255,253,251,0.95);
+
+    border:1px solid var(--border);
+
+    border-radius:20px;
+
+    padding:20px;
+    margin-bottom:14px;
+    transition:all 0.25s ease;
+    box-shadow: var(--shadow-soft);
+
+}
+
+
+button {
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:12px;
+
+}
